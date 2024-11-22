@@ -1,0 +1,25 @@
+q[3], t[1]
+
+procedure Q(x):
+    if x == 0 then:
+        skip
+    elif x == 1 then:
+        H[t[0]]
+    elif x == 2 then:
+        skip
+    else:
+        skip
+    fi
+
+procedure P(k, x):
+    if k == 0 then:
+        Q(x)
+    else:
+        qif q[k]:
+            |0> -> P(k-1, 2*x)
+            |1> -> P(k-1, 2*x+1)
+        fiq
+    fi
+
+procedure main():
+    P(3, 0)
