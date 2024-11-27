@@ -1,0 +1,13 @@
+Qbits q[3]
+
+procedure P(x):
+    begin local x = 1, z = 3:
+        begin local y = 2 * x:
+            x = y + 1
+            y = 3 * x
+        end
+        H[q[x-2]]
+    end
+
+procedure main():
+    P(3)

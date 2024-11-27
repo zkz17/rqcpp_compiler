@@ -38,13 +38,16 @@ def main():
     if DEBUG:
         print(' ****** ****** Program Text ****** ******')
         print(input_path, '--->\n', text)
-        print(' ****** ****** Tokens ****** ******')
+        print()
+        print(' ****** ****** Token List ****** ******')
         print(tokens)
+        print()
 
     ## Generate AST. 
     parser = RQCParser(tokens)
     ast = parser.parse()
     if DEBUG: 
+        print(' ****** ****** AST Structure ****** ******')
         ast.print()
 
     ## TODO

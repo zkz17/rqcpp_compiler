@@ -63,7 +63,7 @@ class RQCParser:
         params = []
         self.consume('LPAREN')
         while True:
-            params.append(self.consume('ID'))
+            params.append(IDNode(str(self.consume('ID').value)))
             token = self.consume()
             if token.type == 'COMMA': continue
             elif token.type == 'RPAREN': break
@@ -88,11 +88,15 @@ class RQCParser:
         token = self.current_token()
         if token.type == 'SKIP':
             self.consume('SKIP')
-            return SkipNode()
+            return SkipStmtNode()
         elif token.type == 'IF':
             return self.if_statement()
+        elif token.type == 'WHILE':
+            return self.while_statement()
         elif token.type == 'QIF':
             return self.qif_statement()
+        elif token.type == 'BEGIN':
+            return self.local_statement()
         elif token.type == 'ID':
             self.consume('ID')
             id = IDNode(str(token.value))
@@ -113,6 +117,7 @@ class RQCParser:
                     if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
                     else: break
                 self.consume('RBRACKET')
+                return UnitaryNode(id, qbits)
             elif token.type == 'LPAREN': # CallNode
                 self.consume('LPAREN')
                 params = []
@@ -121,6 +126,7 @@ class RQCParser:
                     if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
                     else: break
                 self.consume('RPAREN')
+                return CallNode(id, params)
         else: raise Exception('Unexpected token:', token)
         
     def if_statement(self):
@@ -156,6 +162,16 @@ class RQCParser:
         self.consume('FI')
         return IfStmtNode(branches)
     
+    def while_statement(self):
+        self.consume('WHILE')
+        cond = self.expr_boolean()
+        self.consume('DO')
+        self.consume('COLON')
+        body = self.block_statement()
+        self.consume('NEWLINE')
+        self.consume('OD')
+        return WhileStmtNode(cond, body)
+    
     def qif_statement(self):
         self.consume('QIF')
         qbit = self.qbit()
@@ -176,6 +192,26 @@ class RQCParser:
         self.consume('NEWLINE')
         self.consume('FIQ')
         return QifStmtNode(qbit, branches)
+    
+    def local_statement(self):
+        self.consume('BEGIN')
+        self.consume('LOCAL')
+
+        ## Parse local assignment
+        localvars = []
+        while True:
+            id = IDNode(str(self.consume('ID').value))
+            self.consume('ASSIGN')
+            right = self.classical_expr()
+            localvars.append(AssignNode(id, right))
+            if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
+            else: break
+
+        self.consume('COLON')
+        body = self.block_statement()
+        self.consume('NEWLINE')
+        self.consume('END')
+        return LocalStmtNode(localvars, body)
 
     def qbit(self):
         qreg = IDNode(str(self.consume('ID').value))
