@@ -1,4 +1,4 @@
-q[3], t[1]
+Qbits q[3], t[1]
 
 procedure Q(x):
     if x == 0 then:
@@ -16,8 +16,10 @@ procedure P(k, x):
         Q(x)
     else:
         qif q[k]:
-            |0> -> P(k-1, 2*x)
-            |1> -> P(k-1, 2*x+1)
+            |0> -> 
+                P(k-1, 2*x)
+            |1> -> 
+                P(k-1, 2*x+1)
         fiq
     fi
 

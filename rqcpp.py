@@ -1,7 +1,8 @@
 from rqclexer import RQCLexer
+from rqcparser import RQCParser
 import sys
 
-DEBUG = False
+DEBUG = True
 
 def main():
     ## Locate input & output files. 
@@ -41,6 +42,12 @@ def main():
         print(tokens)
 
     ## Generate AST. 
+    parser = RQCParser(tokens)
+    ast = parser.parse()
+    if DEBUG: 
+        ast.print()
+
+    ## TODO
 
 if __name__ == "__main__": 
     main()

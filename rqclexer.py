@@ -3,12 +3,14 @@ import re
 # Define token types
 TOKEN_TYPES = [
     ('INTEGER', r'\d+'),
+    ('KET', r'\|\d+>'),
     ('RARROW', r'\->'),
     ('PLUS', r'\+'),
     ('MINUS', r'\-'),
     ('MULTIPLY', r'\*'),
-    ('PIPE', r'\|'),
+    ('GREATEREQ', r'>='),
     ('GREATERTHAN', r'>'),
+    ('LESSEQ', r'<='),
     ('LESSTHAN', r'<'),
     ('EQUALTO', r'=='),
     ('SKIP', r'skip'),
@@ -17,17 +19,19 @@ TOKEN_TYPES = [
     ('LBRACKET', r'\['),
     ('RBRACKET', r'\]'),
     ('ASSIGN', r'='),
+    ('QBITS', r'Qbits'),
     ('PROCEDURE', r'procedure'),
     ('MAIN', r'main'),
+    ('QIF', r'qif'),
+    ('FIQ', r'fiq'),
     ('IF', r'if'),
     ('THEN', r'then'),
+    ('ELIF', r'elif'),
     ('ELSE', r'else'),
     ('FI', r'fi'),
     ('WHILE', r'while'),
     ('DO', r'do'),
     ('OD', r'od'),
-    ('QIF', r'qif'),
-    ('FIQ', r'fiq'),
     ('BEGIN', r'begin'),
     ('LOCAL', r'local'),
     ('END', r'end'),
@@ -53,6 +57,7 @@ class RQCLexer:
         self.text = text
         self._tokens = []
         self.current_indent = 0
+        self.line_start = True
 
     def tokens(self):
         return self._tokens
@@ -75,6 +80,7 @@ class RQCLexer:
             self.current_indent = indent
 
             # Tokenize the actual content
+            self.line_start = True
             self._tokenize_line(stripped_line)
 
         # Handle remaining DEDENT tokens at the end
@@ -83,6 +89,9 @@ class RQCLexer:
             self.current_indent -= 4
 
     def _tokenize_line(self, line): 
+        if self.line_start: 
+            self._tokens.append(Token('NEWLINE', None))
+            self.line_start = False
         pos = 0
         while pos < len(line):
             for token_type, pattern in TOKEN_TYPES:
