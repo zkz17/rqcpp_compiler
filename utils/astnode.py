@@ -1,11 +1,6 @@
-from symboltable import SymbolTable
-
 # AST Node classes
 class ASTNode:
     def __init__(self):
-        pass
-
-    def add_symbol(self, symbol, type):
         pass
 
     def print(self, level=0, end='\n'):
@@ -25,20 +20,6 @@ class TopNode(ASTNode):
         self._entry = entry
         self._procs = procs
         self._qregs = qregs
-        self._symbols = SymbolTable()
-        for proc in self._procs:
-            # TODO
-            pass
-        for qreg in self._qregs:
-            # TODO
-            pass
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
-        for proc in self._procs:
-            # TODO
-            pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -69,11 +50,6 @@ class ProcNode(ASTNode):
         self._id = id
         self._params = params
         self._body = body
-        self._symbols = SymbolTable()
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -97,11 +73,6 @@ class BlockNode(ASTNode):
     # statements: [ IfStmtNode | QifStmtNode | LocalStmtNode | WhileStmtNode | SkipStmtNode | AssignNode | UnitaryNode | CallNode ]
     def __init__(self, statements):
         self._statements = statements
-        self._symbols = SymbolTable()
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         print('BlockNode')
@@ -112,10 +83,6 @@ class IfStmtNode(ASTNode):
     # branches: [ (CValueNode: BlockNode) ]
     def __init__(self, branches):
         self._branches = branches
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -139,10 +106,6 @@ class WhileStmtNode(ASTNode):
         self._cond = cond
         self._body = body
 
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
-
     def print(self, level=0, end='\n'):
         self.print_indent(level)
         print('WhileStmtNode')
@@ -161,10 +124,6 @@ class QifStmtNode(ASTNode):
     def __init__(self, qbits, branches):
         self._qbits = qbits
         self._branches = branches
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -187,10 +146,6 @@ class LocalStmtNode(ASTNode):
     def __init__(self, localvars, body):
         self._localvars = localvars
         self._body = body
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -225,10 +180,6 @@ class AssignNode(ASTNode):
         self._left = left
         self._right = right
 
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
-
     def print(self, level=0, end='\n'):
         self.print_indent(level)
         print('AssignNode: ', end='')
@@ -236,15 +187,11 @@ class AssignNode(ASTNode):
         self._right.print(0, end=end)
 
 class CallNode(ASTNode):
-    # callee: IDNode
+    # id: IDNode
     # params: [ CValueNode ]
     def __init__(self, id, params):
         self._id = id
         self._params = params
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -267,10 +214,6 @@ class UnitaryNode(ASTNode):
         self._unitary = unitary
         self._qbits = qbits
 
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
-
     def print(self, level=0, end='\n'):
         self.print_indent(level)
         print('UnitaryNode')
@@ -291,15 +234,13 @@ class RangeNode(ASTNode):
         self._low = low
         self._up = up
 
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
-
     def print(self, level=0, end='\n'):
         print('[RangeNode: low = ', end='')
-        self._low.print(0, ', ')
+        if self._low: self._low.print(0, ', ')
+        else: print('None, ', end='')
         print('up = ', end='')
-        self._up.print(0, ']\n')
+        if self._up: self._up.print(0, ']\n')
+        else: print('None]')
 
 class QBitNode(ASTNode):
     # qreg: IDNode
@@ -307,10 +248,6 @@ class QBitNode(ASTNode):
     def __init__(self, qreg, range):
         self._qreg = qreg
         self._range = range
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -325,23 +262,19 @@ class QBitNode(ASTNode):
         self._range.print(level + 1)
 
 class QRegNode(ASTNode):
-    # name: IDNode
+    # id: IDNode
     # length: CValueNode
-    def __init__(self, name, length):
-        self._name = name
+    def __init__(self, id, length):
+        self._id = id
         self._length = length
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
         print('QRegNode')
 
         self.print_indent(level)
-        print('  name: ', end='')
-        self._name.print(level + 1)
+        print('  id: ', end='')
+        self._id.print(level + 1)
 
         self.print_indent(level)
         print('  length: ', end='')
@@ -377,9 +310,6 @@ class CValueNode(ASTNode):
     def value(self):
         pass
 
-    def add_symbol(self, symbol, type):
-        pass
-
     def print(self, level=0, end='\n'):
         pass
 
@@ -393,7 +323,6 @@ class BinOpNode(CValueNode):
         self._left = left
         self._op = op
         self._right = right
-        self._symbols = SymbolTable()
 
     def value(self):
         if self._op.type == 'PLUS':
@@ -414,10 +343,6 @@ class BinOpNode(CValueNode):
             return self._left.value() == self._right.value()
         else:
             raise Exception('Unexpected oprand:', self._op.value)
-
-    def add_symbol(self, symbol, type):
-        # TODO
-        pass
 
     def print(self, level=0, end='\n'):
         print('[CValueNode: ', end='')
@@ -464,3 +389,13 @@ class SingletonNode(CValueNode):
             print('[SingletonNode: ' + str(self._value._value) + ']', end=end)
         else:
             raise Exception('Empty oprand')
+        
+class UndefinedNode(CValueNode):
+    def __init__(self):
+        pass
+
+    def value(self):
+        return 0
+    
+    def print(self, level=0, end='\n'):
+        print('[UndefinedNode]', end=end)

@@ -1,6 +1,6 @@
-Qbits q[3]
+Qbits q[x + 3]
 
-procedure P(x):
+procedure P():
     begin local x = 1, z = 3:
         begin local y = 2 * x:
             x = y + 1
@@ -10,4 +10,4 @@ procedure P(x):
     end
 
 procedure main():
-    P(3)
+    P()

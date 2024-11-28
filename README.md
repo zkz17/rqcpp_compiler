@@ -10,6 +10,7 @@ This is a compiler that supposedly compile the RQC++ language into the low-level
 * Tokenization
 * AST generation
 * AST print
+* Scope analysis
 
 ## TODO
 * Semantic analysis

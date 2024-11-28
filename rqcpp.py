@@ -1,5 +1,6 @@
 from rqclexer import RQCLexer
 from rqcparser import RQCParser
+from rqcanalyzer import RQCAnalyzer
 import sys
 
 DEBUG = True
@@ -50,7 +51,11 @@ def main():
         print(' ****** ****** AST Structure ****** ******')
         ast.print()
 
-    ## TODO
+    ## Semantic Analysis
+    analyzer = RQCAnalyzer(ast)
+    analyzer.analyze()
+
+    ## High-level Transformation
 
 if __name__ == "__main__": 
     main()

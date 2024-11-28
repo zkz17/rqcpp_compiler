@@ -1,4 +1,4 @@
-from astnode import *
+from utils.astnode import *
 
 # Parser class
 class RQCParser:
@@ -8,7 +8,6 @@ class RQCParser:
 
     def current_token(self):
         if self.pos < len(self.tokens):
-            #print(self.tokens[self.pos])
             return self.tokens[self.pos]
         else:
             return None
@@ -62,12 +61,10 @@ class RQCParser:
         ## Parse procedure params
         params = []
         self.consume('LPAREN')
-        while True:
+        while self.current_token() and self.current_token().type != 'RPAREN':
+            if self.current_token().type == 'COMMA': self.consume()
             params.append(IDNode(str(self.consume('ID').value)))
-            token = self.consume()
-            if token.type == 'COMMA': continue
-            elif token.type == 'RPAREN': break
-            else: raise Exception('Unexpected token:', token)
+        self.consume('RPAREN')
 
         ## Parse procedure body
         self.consume('COLON')
@@ -121,10 +118,9 @@ class RQCParser:
             elif token.type == 'LPAREN': # CallNode
                 self.consume('LPAREN')
                 params = []
-                while True:
+                while self.current_token() and self.current_token().type != 'RPAREN':
+                    if self.current_token().type == 'COMMA': self.consume('COMMA')
                     params.append(self.classical_expr())
-                    if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
-                    else: break
                 self.consume('RPAREN')
                 return CallNode(id, params)
         else: raise Exception('Unexpected token:', token)
