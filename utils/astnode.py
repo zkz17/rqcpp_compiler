@@ -1,3 +1,5 @@
+from utils.symboltable import SymbolTable
+
 # AST Node classes
 class ASTNode:
     def __init__(self):
@@ -73,6 +75,7 @@ class BlockNode(ASTNode):
     # statements: [ IfStmtNode | QifStmtNode | LocalStmtNode | WhileStmtNode | SkipStmtNode | AssignNode | UnitaryNode | CallNode ]
     def __init__(self, statements):
         self._statements = statements
+        self._symbols = SymbolTable()
 
     def print(self, level=0, end='\n'):
         print('BlockNode')
@@ -120,7 +123,7 @@ class WhileStmtNode(ASTNode):
 
 class QifStmtNode(ASTNode):
     # qbits: QBitNode
-    # branches: [ (int: BlockNode) ]
+    # branches: [ (int: BlockNode or CallNode) ]
     def __init__(self, qbits, branches):
         self._qbits = qbits
         self._branches = branches
@@ -138,7 +141,11 @@ class QifStmtNode(ASTNode):
         for val, body in self._branches:
             self.print_indent(level + 1)
             print('|' + str(val) + '> -> ', end='')
-            body.print(level + 2)
+            if isinstance(body, BlockNode): body.print(level + 2)
+            elif isinstance(body, CallNode): 
+                print()
+                body.print(level + 2)
+            else: raise Exception(f'Unexpected operation')
 
 class LocalStmtNode(ASTNode):
     # localvars: [ AssignNode ]
@@ -325,7 +332,9 @@ class BinOpNode(CValueNode):
         self._right = right
 
     def value(self):
-        if self._op.type == 'PLUS':
+        if not self._left.value() or not self._right.value():
+            return None
+        elif self._op.type == 'PLUS':
             return self._left.value() + self._right.value()
         elif self._op.type == 'MINUS':
             return self._left.value() - self._right.value()
@@ -375,8 +384,7 @@ class SingletonNode(CValueNode):
 
     def value(self):
         if isinstance(self._value, IDNode):
-            # TODO
-            return 0
+            return None
         elif isinstance(self._value, NumNode):
             return self._value._value
         else:

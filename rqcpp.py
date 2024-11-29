@@ -1,6 +1,7 @@
 from rqclexer import RQCLexer
 from rqcparser import RQCParser
 from rqcanalyzer import RQCAnalyzer
+from rqcgenerator import RQCGenerator
 import sys
 
 DEBUG = True
@@ -51,11 +52,13 @@ def main():
         print(' ****** ****** AST Structure ****** ******')
         ast.print()
 
-    ## Semantic Analysis
+    ## Semantic Analysis.
     analyzer = RQCAnalyzer(ast)
     analyzer.analyze()
 
-    ## High-level Transformation
+    ## Code Generation.
+    generator = RQCGenerator()
+    generator.generate(ast)
 
 if __name__ == "__main__": 
     main()

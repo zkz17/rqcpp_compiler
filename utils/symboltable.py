@@ -27,3 +27,12 @@ class SymbolTable:
             return self.parent.resolve(name)
         else: 
             return None
+        
+    def free_vars(self):
+        free_vars = []
+        if self.parent:
+            for name, symbol in self.parent.table.items():
+                if symbol.type != 'c': continue
+                if not name in self.table:
+                    free_vars.append((name, symbol))
+        return free_vars

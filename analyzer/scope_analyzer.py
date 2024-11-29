@@ -27,13 +27,23 @@ class ScopeAnalyzer:
 
     def generic_visit(self, node):
         ## Default method for unhandled nodes
+        if not node: return
         for child in node.__dict__.values():
             if isinstance(child, list):
                 for item in child:
                     if isinstance(item, ASTNode): 
                         self.visit(item)
+                    elif isinstance(item, tuple): 
+                        for element in item:
+                            self.visit(element)
             elif isinstance(child, ASTNode): 
                 self.visit(child)
+
+    def visit_BlockNode(self, block):
+        for stmt in block._statements:
+            self.visit(stmt)
+
+        block._symbols = self.current_scope
 
     def visit_QRegNode(self, qreg): 
         pass
@@ -85,9 +95,6 @@ class ScopeAnalyzer:
             self.visit(param)
         
     def visit_UnitaryNode(self, unitary):
-        print('*** visiting UnitaryNode ***')
-        unitary.print()
-
         # TODO
         # check unitary validity
 
