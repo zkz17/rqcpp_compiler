@@ -322,6 +322,32 @@ class CValueNode(ASTNode):
 
     def equal_to(self, node):
         return isinstance(node, CValueNode) and self.value() == node.value()
+    
+class UnaOpNode(CValueNode):
+    # right: CValueNode
+    # op: Token
+    def __init__(self, op, right):
+        self._op = op
+        self._right = right
+
+    def value(self):
+        if self._op.type == 'MINUS':
+            return -self._right.value()
+        elif self._op.type == 'NOT':
+            return not self._right.value()
+        else:
+            raise Exception('Unrecognized operator: ', self._op.value)
+        
+    def print(self, level=0, end='\n'):
+        print('[CValueNode: ', end='')
+        if self._op.type == 'MINUS':
+            print('- ', end='')
+        elif self._op.type == 'NOT':
+            print('NOT ', end='')
+        else:
+            raise Exception('Unrecognized operator: ', self._op.value)
+        self._right.print(0, '')
+        print(']', end=end)
 
 class BinOpNode(CValueNode):
     # left, right: CValueNode
@@ -350,8 +376,14 @@ class BinOpNode(CValueNode):
             return self._left.value() < self._right.value()
         elif self._op.type == 'EQUALTO':
             return self._left.value() == self._right.value()
+        elif self._op.type == 'NOTEQUAL':
+            return self._left.value() != self._right.value()
+        elif self._op.type == 'AND':
+            return self._left.value() and self._right.value()
+        elif self._op.type == 'OR':
+            return self._left.value() or self._right.value()
         else:
-            raise Exception('Unexpected oprand:', self._op.value)
+            raise Exception('Unrecognized operator:', self._op.value)
 
     def print(self, level=0, end='\n'):
         print('[CValueNode: ', end='')
@@ -372,6 +404,12 @@ class BinOpNode(CValueNode):
             print(' <= ', end='')
         elif self._op.type == 'EQUALTO':
             print(' == ', end='')
+        elif self._op.type == 'NOTEQUAL':
+            print(' != ', end='')
+        elif self._op.type == 'AND':
+            print(' and ', end='')
+        elif self._op.type == 'OR':
+            print(' or ', end='')
         else:
             raise Exception('Unexpected oprand:', self._op.value)
         self._right.print(0, '')
@@ -397,6 +435,17 @@ class SingletonNode(CValueNode):
             print('[SingletonNode: ' + str(self._value._value) + ']', end=end)
         else:
             raise Exception('Empty oprand')
+        
+class ProcParamNode(CValueNode):
+    # id: IDNode
+    def __init__(self, id):
+        self._id = id
+
+    def value(self):
+        return None
+
+    def print(self, level=0, end='\n'):
+        print('[ProcParamNode: param ' + str(self._id._id) + ']', end=end)
         
 class UndefinedNode(CValueNode):
     def __init__(self):

@@ -51,7 +51,7 @@ class ScopeAnalyzer:
     def visit_ProcNode(self, proc):
         self.enter_scope()
         for param in proc._params:
-            self.current_scope.define(param._id, 'c', UndefinedNode())
+            self.current_scope.define(param._id, 'c', ProcParamNode(param))
         self.visit(proc._body)
         self.exit_scope()
 

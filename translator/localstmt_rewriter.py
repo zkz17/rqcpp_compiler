@@ -3,7 +3,9 @@ from utils.astnode import *
 # Local Statement Rewrite class
 class LocalStmtRewriter:
     def __init__(self):
-        pass
+        self.temp_var_prefix = '%'
+        self.temp_var_counter = 0
+        self.available_temp_name = []
 
     def rewrite(self, ast):
         self.visit(ast)
@@ -15,7 +17,7 @@ class LocalStmtRewriter:
 
     def generic_visit(self, node):
         ## Default method for unhandled nodes
-        if not node: return
+        if not isinstance(node, ASTNode): return []
         for child in node.__dict__.values():
             if isinstance(child, list):
                 for item in child:
@@ -39,5 +41,14 @@ class LocalStmtRewriter:
     
     def visit_LocalStmtNode(self, localstmt):
         statements = []
-        ## TODO
+        for assign in localstmt._localvars:
+            temp_var = IDNode(self.get_tempvar_name)
+            ## TODO
         return statements
+    
+    def get_tempvar_name(self):
+        if len(self.available_temp_name):
+            return self.available_temp_name.pop()
+        name = self.temp_var_prefix + str(self.temp_var_counter)
+        self.temp_var_counter += 1
+        return name

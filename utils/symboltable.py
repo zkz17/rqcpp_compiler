@@ -35,4 +35,5 @@ class SymbolTable:
                 if symbol.type != 'c': continue
                 if not name in self.table:
                     free_vars.append((name, symbol))
+            free_vars += self.parent.free_vars()
         return free_vars

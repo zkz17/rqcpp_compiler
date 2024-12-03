@@ -3,8 +3,12 @@ class RQCGenerator:
     def __init__(self):
         pass
 
-    def generate(self, ast):
+    def generate(self, ast, DEBUG=False):
         self.highLvlTrans(ast)
+        if DEBUG:
+            print(' ****** ****** AST After High-Level Transformation ****** ******')
+            ast.print()
+        
         self.high2midTrans(ast)
         self.mid2lowTrans(ast)
 

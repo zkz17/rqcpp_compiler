@@ -51,6 +51,7 @@ def main():
     if DEBUG: 
         print(' ****** ****** AST Structure ****** ******')
         ast.print()
+        print()
 
     ## Semantic Analysis.
     analyzer = RQCAnalyzer(ast)
@@ -58,7 +59,7 @@ def main():
 
     ## Code Generation.
     generator = RQCGenerator()
-    generator.generate(ast)
+    generator.generate(ast, DEBUG)
 
 if __name__ == "__main__": 
     main()

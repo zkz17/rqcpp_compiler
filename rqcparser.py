@@ -259,22 +259,42 @@ class RQCParser:
         return self.expr_plus_minus()
     
     def expr_boolean(self):
+        node = self.expr_not()
+        while self.current_token() and self.current_token().type in ['AND', 'OR', 'XOR']: 
+            op = self.consume()
+            right = self.expr_not()
+            node = BinOpNode(node, op, right)
+        return node
+    
+    def expr_not(self):
+        if self.current_token() and self.current_token().type == 'NOT':
+            op = self.consume('NOT')
+            return UnaOpNode(op, self.expr_not())
+        return self.expr_comp()
+
+    def expr_comp(self):
         node = self.expr_plus_minus()
 
-        while self.current_token and self.current_token().type in ['GREATEREQ', 'GREATERTHAN', 'LESSEQ', 'LESSTHAN', 'EQUALTO']: 
+        while self.current_token() and self.current_token().type in ['GREATEREQ', 'GREATERTHAN', 'LESSEQ', 'LESSTHAN', 'EQUALTO', 'NOTEQUAL']: 
             op = self.consume()
             right = self.expr_plus_minus()
             node = BinOpNode(node, op, right)
         return node
     
     def expr_plus_minus(self):
-        node = self.expr_mul_div()
+        node = self.expr_minus()
 
-        while self.current_token and self.current_token().type in ['PLUS', 'MINUS']:
+        while self.current_token() and self.current_token().type in ['PLUS', 'MINUS']:
             op = self.consume()
-            right = self.expr_mul_div()
+            right = self.expr_minus()
             node = BinOpNode(node, op, right)
         return node
+    
+    def expr_minus(self):
+        if self.current_token() and self.current_token().type == 'MINUS':
+            op = self.consume('MINUS')
+            return UnaOpNode(op, self.expr_minus())
+        return self.expr_mul_div()
 
     def expr_mul_div(self):
         node = self.expr_primary()

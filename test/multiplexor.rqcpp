@@ -5,7 +5,7 @@ procedure Q(x):
         skip
     elif x == 1 then:
         H[t[0]]
-    elif x == 2 then:
+    elif not (x != 2 and x != 3) then:
         skip
     else:
         skip
