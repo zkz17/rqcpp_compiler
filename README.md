@@ -12,6 +12,7 @@ This is a compiler that supposedly compile the RQC++ language into the low-level
 * AST print
 * Scope analysis
 * Quantum branch rewrite
+* Expression extraction rewrite
 
 ## TODO
 * PROGRESS: Semantic analysis

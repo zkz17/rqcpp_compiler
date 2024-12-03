@@ -1,6 +1,7 @@
 from rqclexer import RQCLexer
 from rqcparser import RQCParser
 from rqcanalyzer import RQCAnalyzer
+from rqctransformer import RQCTransformer
 from rqcgenerator import RQCGenerator
 import sys
 
@@ -56,6 +57,14 @@ def main():
     ## Semantic Analysis.
     analyzer = RQCAnalyzer(ast)
     analyzer.analyze()
+
+    ## High-Level Transformation. 
+    transformer = RQCTransformer()
+    transformer.transform(ast)
+    if DEBUG: 
+        print(' ****** ****** AST Structure After High-Level Transformation ****** ******')
+        ast.print()
+        print()
 
     ## Code Generation.
     generator = RQCGenerator()

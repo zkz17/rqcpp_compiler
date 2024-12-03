@@ -4,18 +4,8 @@ class RQCGenerator:
         pass
 
     def generate(self, ast, DEBUG=False):
-        self.highLvlTrans(ast)
-        if DEBUG:
-            print(' ****** ****** AST After High-Level Transformation ****** ******')
-            ast.print()
-        
         self.high2midTrans(ast)
         self.mid2lowTrans(ast)
-
-    def highLvlTrans(self, ast):
-        from translator.highlvl_translator import HighLvlTransformer
-        transformer = HighLvlTransformer()
-        transformer.transform(ast)
 
     def high2midTrans(self, ast):
         from translator.high2mid_translator import High2MidTransLator
