@@ -5,7 +5,7 @@ class RQCTransformer:
 
     def transform(self, ast):
         self.quantum_branch_rewrite(ast)
-        #self.local_statement_rewrite(ast)
+        self.local_statement_rewrite(ast)
         self.expr_extract_rewrite(ast)
         self.expr_split_rewrite(ast)
 

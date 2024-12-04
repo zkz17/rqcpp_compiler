@@ -10,17 +10,23 @@ class LocalStmtRewriter(Rewriter):
         self.visit(ast)
     
     def visit_BlockNode(self, block):
-        statements = []
+        new_statements = []
         for stmt in block._statements:
-            new_statements = self.visit(stmt)
-            if len(new_statements): statements += new_statements
-            else: statements.append(stmt)
-        block._statements = statements
+            stmt_list = self.visit(stmt)
+            if len(stmt_list): new_statements += stmt_list
+            else: new_statements.append(stmt)
+        block._statements = new_statements
         return []
     
     def visit_LocalStmtNode(self, localstmt):
-        statements = []
+        new_statements = []
+        restore_statements = []
         for assign in localstmt._localvars:
-            temp_var = IDNode(self.get_tempvar_name)
-            ## TODO
-        return statements
+            tempvar = IDNode(self.get_tempvar_name())
+            new_statements.append(AssignNode(tempvar, SingletonNode(assign._left)))
+            new_statements.append(assign)
+            restore_statements.append(AssignNode(assign._left, SingletonNode(tempvar)))
+        self.visit(localstmt._body)
+        new_statements += localstmt._body._statements
+        new_statements += restore_statements
+        return new_statements
