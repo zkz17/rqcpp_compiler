@@ -13,6 +13,7 @@ This is a compiler that supposedly compile the RQC++ language into the low-level
 * Scope analysis
 * Quantum branch rewrite
 * Expression extraction rewrite
+* Expression split rewrite
 
 ## TODO
 * PROGRESS: Semantic analysis
@@ -20,8 +21,9 @@ This is a compiler that supposedly compile the RQC++ language into the low-level
   * ...
 * PROGRESS: QINS code generation
 * PROGRESS: Partial evaluation
-* FEATURE : classical variable array
-* FEATURE : procedure array
+* FEATURE : Classical variable array
+* FEATURE : Procedure array
 * DEBUG   : Symbol table visualization
+* DEBUG   : Test cases
 * Optional: Optimization passes
 * ...

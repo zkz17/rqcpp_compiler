@@ -20,14 +20,14 @@ class ExprExtractRewriter(Rewriter):
         return []
     
     def visit_IfStmtNode(self, ifstmt):
-        used_tempvar_name = []
+        #used_tempvar_name = []
         new_statements = []
         new_branches = []
 
         for cond, body in ifstmt._branches:
             if cond and not isinstance(cond, SingletonNode):
                 tempvar_name = self.get_tempvar_name()
-                used_tempvar_name.append(tempvar_name)
+                #used_tempvar_name.append(tempvar_name)
 
                 tempvar = IDNode(tempvar_name)
                 new_statements.append(AssignNode(tempvar, cond))
@@ -39,16 +39,16 @@ class ExprExtractRewriter(Rewriter):
 
         ifstmt._branches = new_branches
         new_statements.append(ifstmt)
-        self.free_tempvar_name(used_tempvar_name)
+        #self.free_tempvar_name(used_tempvar_name)
         return new_statements
     
     def visit_WhileStmtNode(self, whilestmt):
-        used_tempvar_name = []
+        #used_tempvar_name = []
         new_statements = []
 
         if whilestmt._cond and not isinstance(whilestmt._cond, SingletonNode):
             tempvar_name = self.get_tempvar_name()
-            used_tempvar_name.append(tempvar_name)
+            #used_tempvar_name.append(tempvar_name)
 
             tempvar = IDNode(tempvar_name)
             new_statements.append(AssignNode(tempvar, whilestmt._cond))
@@ -57,11 +57,11 @@ class ExprExtractRewriter(Rewriter):
 
         self.visit(whilestmt._body)
         new_statements.append(whilestmt)
-        self.free_tempvar_name(used_tempvar_name)
+        #self.free_tempvar_name(used_tempvar_name)
         return new_statements
     
     def visit_QifStmtNode(self, qifstmt):
-        used_tempvar_name = []
+        #used_tempvar_name = []
         new_statements = []
 
         for _, call in qifstmt._branches:
@@ -71,7 +71,7 @@ class ExprExtractRewriter(Rewriter):
             for param in call._params:
                 if not isinstance(param, SingletonNode):
                     tempvar_name = self.get_tempvar_name()
-                    used_tempvar_name.append(tempvar_name)
+                    #used_tempvar_name.append(tempvar_name)
 
                     tempvar = IDNode(tempvar_name)
                     new_statements.append(AssignNode(tempvar, param))
@@ -81,18 +81,18 @@ class ExprExtractRewriter(Rewriter):
             call._params = new_params
 
         new_statements.append(qifstmt)
-        self.free_tempvar_name(used_tempvar_name)
+        #self.free_tempvar_name(used_tempvar_name)
         return new_statements
     
     def visit_CallNode(self, call):
-        used_tempvar_name = []
+        #used_tempvar_name = []
         new_statements = []
         new_params = []
 
         for param in call._params:
             if not isinstance(param, SingletonNode):
                 tempvar_name = self.get_tempvar_name()
-                used_tempvar_name.append(tempvar_name)
+                #used_tempvar_name.append(tempvar_name)
 
                 tempvar = IDNode(tempvar_name)
                 new_statements.append(AssignNode(tempvar, param))
@@ -101,5 +101,5 @@ class ExprExtractRewriter(Rewriter):
                 new_params.append(param)
         call._params = new_params
         new_statements.append(call)
-        self.free_tempvar_name(used_tempvar_name)
+        #self.free_tempvar_name(used_tempvar_name)
         return new_statements
