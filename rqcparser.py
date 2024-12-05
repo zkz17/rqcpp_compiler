@@ -1,4 +1,5 @@
 from utils.astnode import *
+from basic_gates import basic_gates
 
 # Parser class
 class RQCParser:
@@ -95,8 +96,7 @@ class RQCParser:
         elif token.type == 'BEGIN':
             return self.local_statement()
         elif token.type == 'ID':
-            self.consume('ID')
-            id = IDNode(str(token.value))
+            id = self.term()
 
             token = self.current_token()
             if not token or token.type == 'NEWLINE' or token.type == 'DEDENT': # What are you doing? 
@@ -105,24 +105,24 @@ class RQCParser:
                 self.consume('ASSIGN')
                 right = self.classical_expr()
                 return AssignNode(id, right)
-            elif token.type == 'LBRACKET': # UnitaryNode
-                self.consume('LBRACKET')
-                qbits = []
-                ## Parse qbits
-                while True:
-                    qbits.append(self.qbit())
-                    if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
-                    else: break
-                self.consume('RBRACKET')
-                return UnitaryNode(id, qbits)
-            elif token.type == 'LPAREN': # CallNode
+            elif token.type == 'LPAREN': 
                 self.consume('LPAREN')
-                params = []
-                while self.current_token() and self.current_token().type != 'RPAREN':
-                    if self.current_token().type == 'COMMA': self.consume('COMMA')
-                    params.append(self.classical_expr())
-                self.consume('RPAREN')
-                return CallNode(id, params)
+                if isinstance(id, BasicGateNode): # UnitaryNode
+                    qbits = []
+                    ## Parse qbits
+                    while True:
+                        qbits.append(self.qbit())
+                        if self.current_token() and self.current_token().type == 'COMMA': self.consume('COMMA')
+                        else: break
+                    self.consume('RPAREN')
+                    return UnitaryNode(id, qbits)
+                else: # CallNode
+                    params = []
+                    while self.current_token() and self.current_token().type != 'RPAREN':
+                        if self.current_token().type == 'COMMA': self.consume('COMMA')
+                        params.append(self.classical_expr())
+                    self.consume('RPAREN')
+                    return CallNode(id, params)
         else: raise Exception('Unexpected token:', token)
         
     def if_statement(self):
@@ -313,7 +313,13 @@ class RQCParser:
             self.consume('RPAREN')
             return expr
         else:
-            return SingletonNode(self.term())
+            operand = self.term()
+            if self.current_token() and self.current_token().type == 'LBRACKET':
+                self.consume('LBRACKET')
+                range = self.range()
+                self.consume('RBRACKET')
+                operand = ArrayElementNode(operand, range)
+            return SingletonNode(operand)
 
     def term(self):
         token = self.current_token()
@@ -322,6 +328,16 @@ class RQCParser:
             return NumNode(int(token.value))
         elif token.type == 'ID':
             self.consume()
-            return IDNode(str(token.value))
+            id = str(token.value)
+            if id in basic_gates:
+                return BasicGateNode(id)
+            else:
+                node = IDNode(id)
+                while self.current_token() and self.current_token().type == 'LBRACKET':
+                    self.consume('LBRACKET')
+                    range = self.range()
+                    self.consume('RBRACKET')
+                    node = ArrayElementNode(node, range)
+                return node
         else:
             raise Exception('Unexpected token:', token)

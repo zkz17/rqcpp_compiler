@@ -3,7 +3,7 @@ class RQCGenerator:
     def __init__(self):
         pass
 
-    def generate(self, ast, DEBUG=False):
+    def generate(self, ast):
         self.high2midTrans(ast)
         self.mid2lowTrans(ast)
 

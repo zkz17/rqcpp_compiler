@@ -2,8 +2,10 @@ Qbits q[3]
 
 procedure P(k, x):
     while k >= x do:
-        H[q[k]]
+        H(q[k])
         k = k - 1
+        x[1][2] = 2 * 6
+        m = x[1] + 1
     od
 
 procedure main():

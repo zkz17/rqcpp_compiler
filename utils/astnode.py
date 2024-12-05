@@ -215,10 +215,10 @@ class CallNode(ASTNode):
         print()
 
 class UnitaryNode(ASTNode):
-    # unitary: IDNode
+    # gate: BasicGateNode
     # qbits: [ QBitNode ]
-    def __init__(self, unitary, qbits):
-        self._unitary = unitary
+    def __init__(self, gate, qbits):
+        self._gate = gate
         self._qbits = qbits
 
     def print(self, level=0, end='\n'):
@@ -226,8 +226,8 @@ class UnitaryNode(ASTNode):
         print('UnitaryNode')
 
         self.print_indent(level)
-        print('  unitary: ', end='')
-        self._unitary.print(0)
+        print('  gate: ', end='')
+        self._gate.print(0)
 
         self.print_indent(level)
         print('  qbits: ')
@@ -246,8 +246,25 @@ class RangeNode(ASTNode):
         if self._low: self._low.print(0, ', ')
         else: print('None, ', end='')
         print('up = ', end='')
-        if self._up: self._up.print(0, ']\n')
-        else: print('None]')
+        if self._up: self._up.print(0, ']' + end)
+        else: print('None]', end=end)
+
+class ArrayElementNode(ASTNode):
+    # id: IDNode
+    # array: IDNode or ArrayElementNodeay
+    # range: RangeNode
+    def __init__(self, array, range):
+        self._array = array
+        self._range = range
+        if isinstance(array, IDNode): self._id = array
+        else: self._id = array._id
+
+    def print(self, level=0, end='\n'):
+        self.print_indent(level)
+        print('[ArrayElementNode: ', end='')
+        self._array.print(0, ', ')
+        self._range.print(0, '')
+        print(']', end=end)
 
 class QBitNode(ASTNode):
     # qreg: IDNode
@@ -308,6 +325,17 @@ class IDNode(ASTNode):
 
     def equal_to(self, node):
         return isinstance(node, IDNode) and self._id == node._id
+    
+class BasicGateNode(IDNode):
+    # id: str
+    def __init__(self, id):
+        self._id = id
+
+    def print(self, level=0, end='\n'):
+        print('[BasicGateNode: ' + str(self._id) + ']', end=end)
+
+    def equal_to(self, node):
+        return isinstance(node, BasicGateNode) and self._id == node._id
 
 class CValueNode(ASTNode):
     # abstract node of classical value
@@ -416,7 +444,7 @@ class BinOpNode(CValueNode):
         print(']', end=end)
     
 class SingletonNode(CValueNode):
-    # value: IDNode or NumNode
+    # value: IDNode or NumNode or ArrayElementNode
     def __init__(self, value):
         self._value = value
 
@@ -425,6 +453,8 @@ class SingletonNode(CValueNode):
             return None
         elif isinstance(self._value, NumNode):
             return self._value._value
+        elif isinstance(self._value, ArrayElementNode):
+            return None
         else:
             raise Exception('Empty oprand')
 
@@ -433,6 +463,10 @@ class SingletonNode(CValueNode):
             print('[SingletonNode: variable ' + str(self._value._id) + ']', end=end)
         elif isinstance(self._value, NumNode): 
             print('[SingletonNode: ' + str(self._value._value) + ']', end=end)
+        elif isinstance(self._value, ArrayElementNode): 
+            print('[SingletonNode: ', end='')
+            self._value.print(0, '')
+            print(']', end=end)
         else:
             raise Exception('Empty oprand')
         

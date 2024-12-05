@@ -6,7 +6,7 @@ procedure P():
             x = y + 1
             y = 3 * x
         end
-        H[q[x-2]]
+        H(q[x-2])
     end
 
 procedure main():
