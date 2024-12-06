@@ -39,7 +39,7 @@ class QBranchRewriter(Rewriter):
             proc_params, call_params = [], []
             ## TODO
             ## Optimization: only actually used free variables as params
-            for _, symbol in block._symbols.free_vars():
+            for _, symbol in block._symbols.free_vars().items():
                 var = IDNode(symbol.name)
                 proc_params.append(var)
                 call_params.append(SingletonNode(var))

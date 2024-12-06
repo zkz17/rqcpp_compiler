@@ -3,6 +3,9 @@ class Type:
     def __init__(self):
         pass
 
+    def is_procedure(self):
+        return False
+
     def is_classical(self):
         return False
     
@@ -14,6 +17,24 @@ class Type:
     
     def equal_to(self, type):
         return False
+    
+class ProcParamType(Type):
+    def __init__(self, num_param=0):
+        super().__init__()
+    
+    def equal_to(self, type):
+        return isinstance(type, ProcParamType)
+    
+class ProcedureType(Type):
+    def __init__(self, num_param=0):
+        super().__init__()
+        self.num_param = num_param
+
+    def is_procedure(self):
+        return True
+    
+    def equal_to(self, type):
+        return isinstance(type, ProcedureType)
     
 class ClassicalType(Type):
     def __init__(self):
