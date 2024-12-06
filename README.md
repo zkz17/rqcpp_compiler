@@ -11,17 +11,16 @@ This is a compiler that supposedly compile the RQC++ language into the low-level
 * Tokenization
 * AST generation
 * AST print
-* Scope analysis
 * Unitary check
+* Semantic analysis
+  * Scope analysis
+  * Type check
 * Symbol table visualization
 * Quantum branch rewrite
 * Expression extraction rewrite
 * Expression split rewrite
 
 ## TODO
-* PROGRESS: Semantic analysis
-  * Type check
-  * ...
 * PROGRESS: High-level transformation
   * Extract substripted expressions
   * ...

@@ -1,12 +1,12 @@
+from analyzer.analyzer import Analyzer
 from utils.symboltable import SymbolTable
 from utils.astnode import *
 from utils.type import *
 
 # Scope Analyzer class
-class ScopeAnalyzer:
+class ScopeAnalyzer(Analyzer):
     def __init__(self):
-        self.global_scope = SymbolTable()
-        self.current_scope = self.global_scope
+        super().__init__()
 
     def analyze(self, ast):
         self.register_procs(ast)
@@ -22,33 +22,11 @@ class ScopeAnalyzer:
         for qreg in topnode._qregs:
             self.global_scope.define(qreg._id._id, QuantumType())
 
-    def visit(self, node):
-        method_name = f"visit_{type(node).__name__}"
-        method = getattr(self, method_name, self.generic_visit)
-        method(node)
-
-    def generic_visit(self, node):
-        ## Default method for unhandled nodes
-        if not node: return
-        for child in node.__dict__.values():
-            if isinstance(child, list):
-                for item in child:
-                    if isinstance(item, ASTNode): 
-                        self.visit(item)
-                    elif isinstance(item, tuple): 
-                        for element in item:
-                            self.visit(element)
-            elif isinstance(child, ASTNode): 
-                self.visit(child)
-
     def visit_BlockNode(self, block):
         for stmt in block._statements:
             self.visit(stmt)
 
         block._symbols = self.current_scope
-
-    def visit_QRegNode(self, qreg): 
-        pass
 
     def visit_ProcNode(self, proc):
         self.enter_scope()
@@ -95,8 +73,7 @@ class ScopeAnalyzer:
 
     def visit_CallNode(self, call):
         proc_name = call._id._id
-        symbol = self.get_symbol(proc_name, 'p')
-        if len(call._params) != symbol.type.num_param: raise Exception(f'Unmatched number of params for procedure call \'{proc_name}\'')
+        self.get_symbol(proc_name)
 
         for param in call._params:
             self.visit(param)
@@ -106,7 +83,7 @@ class ScopeAnalyzer:
             self.visit(qbit)
 
     def visit_QBitNode(self, qbit):
-        self.get_symbol(qbit._qreg._id, 'q')
+        self.get_symbol(qbit._qreg._id)
         self.visit(qbit._range)
 
     def visit_RangeNode(self, range):
@@ -119,28 +96,9 @@ class ScopeAnalyzer:
 
     def visit_SingletonNode(self, singleton):
         if isinstance(singleton._value, IDNode):
-            self.get_symbol(singleton._value._id, 'c')
+            self.get_symbol(singleton._value._id)
         elif isinstance(singleton._value, ArrayElementNode):
-            self.get_symbol(singleton._value._id._id, 'a')
-
-    def get_symbol(self, varname, vartype='c'):
-        symbol = self.current_scope.resolve(varname)
-        if not symbol: raise Exception(f'Undefined reference to \'{varname}\'')
-        if symbol.type.is_param(): return symbol
-
-        if vartype == 'p' and not symbol.type.is_procedure():
-            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not callable') 
-        elif vartype == 'a' and not symbol.type.is_array():
-            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not an array')
-        elif vartype == 'q' and not symbol.type.is_quantum():
-            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not quantum')
-        elif vartype == 'c' and not symbol.type.is_classical():
-            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not a non-array classical variable')
-        
-        return symbol
+            self.get_symbol(singleton._value._id._id)
 
     def enter_scope(self):
         self.current_scope = SymbolTable(parent=self.current_scope)
-
-    def exit_scope(self):
-        self.current_scope = self.current_scope.parent

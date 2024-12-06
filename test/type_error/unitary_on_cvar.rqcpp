@@ -1,0 +1,5 @@
+Qbits q[1]
+
+procedure main():
+    x = 1
+    T(x)

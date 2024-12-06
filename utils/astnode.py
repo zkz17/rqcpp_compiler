@@ -357,6 +357,9 @@ class ListNode(CValueNode):
     def __init__(self, cvals):
         self._cvals = cvals
 
+    def value(self):
+        return None
+
     def print(self, level=0, end='\n'):
         print('[ListNode: ', end='')
         for cval in self._cvals:
@@ -388,7 +391,9 @@ class UnaOpNode(CValueNode):
         self._right = right
 
     def value(self):
-        if self._op.type == 'MINUS':
+        if not self._right.value(): 
+            return None
+        elif self._op.type == 'MINUS':
             return -self._right.value()
         elif self._op.type == 'NOT':
             return not self._right.value()
@@ -515,7 +520,7 @@ class UndefinedNode(CValueNode):
         pass
 
     def value(self):
-        return 0
+        return None
     
     def print(self, level=0, end='\n'):
         print('[UndefinedNode]', end=end)

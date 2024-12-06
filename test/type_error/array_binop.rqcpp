@@ -1,0 +1,5 @@
+Qbits q[1]
+
+procedure main():
+    x[3][2] = [1]
+    y = 1 + x[1]

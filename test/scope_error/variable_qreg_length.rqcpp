@@ -1,0 +1,7 @@
+Qbits q[P]
+
+procedure P():
+    skip
+
+procedure main():
+    P()

@@ -22,7 +22,7 @@ class Type:
         return False
     
 class ProcParamType(Type):
-    def __init__(self, num_param=0):
+    def __init__(self):
         super().__init__()
 
     def is_param(self):

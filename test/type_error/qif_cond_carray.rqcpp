@@ -1,0 +1,10 @@
+Qbits q[1]
+
+procedure main():
+    x[3] = [1]
+    qif x[2]:
+        |0> ->
+            skip
+        |1> ->
+            H(q[1])
+    fiq

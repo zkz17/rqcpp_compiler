@@ -55,8 +55,8 @@ def main():
         print()
 
     ## Semantic Analysis.
-    analyzer = RQCAnalyzer(ast)
-    analyzer.analyze()
+    analyzer = RQCAnalyzer()
+    analyzer.analyze(ast)
     if DEBUG:
         print(' ****** ****** Symbol Table ****** ******')
         ast._symbols.print()
