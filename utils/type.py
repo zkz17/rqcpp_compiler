@@ -3,6 +3,9 @@ class Type:
     def __init__(self):
         pass
 
+    def is_param(self):
+        return False
+
     def is_procedure(self):
         return False
 
@@ -21,6 +24,9 @@ class Type:
 class ProcParamType(Type):
     def __init__(self, num_param=0):
         super().__init__()
+
+    def is_param(self):
+        return True
     
     def equal_to(self, type):
         return isinstance(type, ProcParamType)
@@ -29,6 +35,9 @@ class ProcedureType(Type):
     def __init__(self, num_param=0):
         super().__init__()
         self.num_param = num_param
+        self.param_types = []
+        for i in range(num_param):
+            self.param_types.append(ProcParamType())
 
     def is_procedure(self):
         return True

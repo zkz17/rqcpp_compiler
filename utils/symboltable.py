@@ -10,6 +10,8 @@ class Symbol:
 class SymbolTable:
     def __init__(self, parent=None):
         self.parent = parent
+        if parent: parent.children.append(self)
+        self.children = []
         self.table = {}
         self.free_var = {}
 
@@ -18,7 +20,7 @@ class SymbolTable:
         else: self.table[name] = Symbol(name, type)
 
     def assign(self, name, type):
-        self.table[name] = Symbol(name, type)
+        if not name in self.table: self.table[name] = Symbol(name, type)
 
     def resolve(self, name): 
         if name in self.table: 
@@ -33,3 +35,20 @@ class SymbolTable:
         
     def free_vars(self):
         return self.free_var
+    
+    def print_indent(self, level=0):
+        print('    ' * level, end='')
+    
+    def print(self, level=0):
+        if not len(self.table) and not len(self.children): return
+        self.print_indent(level)
+        print('{')
+        for name, symbol in self.table.items():
+            self.print_indent(level + 1)
+            print(f'{name}: {type(symbol.type).__name__}')
+
+        for child in self.children:
+            child.print(level + 1)
+
+        self.print_indent(level)
+        print('}')

@@ -103,8 +103,14 @@ class RQCParser:
                 return id
             elif token.type == 'ASSIGN': # AssignNode
                 self.consume('ASSIGN')
-                right = self.classical_expr()
-                return AssignNode(id, right)
+                if self.current_token() and self.current_token().type == 'LBRACKET': # ListNode
+                    self.consume('LBRACKET')
+                    right = self.list_expr()
+                    self.consume('RBRACKET')
+                    return AssignNode(id, right)
+                else:
+                    right = self.classical_expr()
+                    return AssignNode(id, right)
             elif token.type == 'LPAREN': 
                 self.consume('LPAREN')
                 if isinstance(id, BasicGateNode): # UnitaryNode
@@ -254,6 +260,13 @@ class RQCParser:
                     up = self.classical_expr()
                 return RangeNode(low, up)
             else: return RangeNode(low, low)
+
+    def list_expr(self):
+        cvals = []
+        while self.current_token() and self.current_token().type != 'RBRACKET':
+            if self.current_token().type == 'COMMA': self.consume('COMMA')
+            cvals.append(self.classical_expr())
+        return ListNode(cvals)
 
     def classical_expr(self): 
         return self.expr_plus_minus()

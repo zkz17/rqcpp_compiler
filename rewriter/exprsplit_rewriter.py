@@ -49,5 +49,8 @@ class ExprSplitRewriter(Rewriter):
             new_val = BinOpNode(left, cval._op, right)
             new_statements.append(AssignNode(tempvar, new_val))
             return new_statements, SingletonNode(tempvar)
+        elif isinstance(cval, ListNode):
+            ## TODO
+            return [], cval
         else:
             raise Exception(f'Undefined classical value type {type(cval).__name__}')

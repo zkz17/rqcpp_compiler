@@ -12,6 +12,7 @@ class ScopeAnalyzer:
         self.register_procs(ast)
         self.register_qregs(ast)
         self.visit(ast)
+        ast._symbols = self.global_scope
 
     def register_procs(self, topnode):
         for proc in topnode._procs:
@@ -52,7 +53,7 @@ class ScopeAnalyzer:
     def visit_ProcNode(self, proc):
         self.enter_scope()
         for param in proc._params:
-            self.current_scope.define(param._id, ClassicalType())
+            self.current_scope.define(param._id, ProcParamType())
         self.visit(proc._body)
         self.exit_scope()
 
@@ -85,7 +86,12 @@ class ScopeAnalyzer:
 
     def visit_AssignNode(self, assign):
         self.visit(assign._right)
-        self.current_scope.assign(assign._left._id, ClassicalType())
+        var = assign._left
+        vartype = ClassicalType()
+        while not isinstance(var, IDNode):
+            var = var._array
+            vartype = ArrayType(vartype)
+        self.current_scope.assign(var._id, vartype)
 
     def visit_CallNode(self, call):
         proc_name = call._id._id
@@ -96,9 +102,6 @@ class ScopeAnalyzer:
             self.visit(param)
         
     def visit_UnitaryNode(self, unitary):
-        # TODO
-        # check unitary validity
-
         for qbit in unitary._qbits:
             self.visit(qbit)
 
@@ -117,16 +120,23 @@ class ScopeAnalyzer:
     def visit_SingletonNode(self, singleton):
         if isinstance(singleton._value, IDNode):
             self.get_symbol(singleton._value._id, 'c')
+        elif isinstance(singleton._value, ArrayElementNode):
+            self.get_symbol(singleton._value._id._id, 'a')
 
-    def get_symbol(self, varname, type='c'):
+    def get_symbol(self, varname, vartype='c'):
         symbol = self.current_scope.resolve(varname)
-        variable_type = {'c': ClassicalType(), 'q': QuantumType(), 'p': ProcedureType()}
-        variable_type_str = {'c': 'classical variable', 'q': 'quantum variable', 'p': 'procedure'}
-
         if not symbol: raise Exception(f'Undefined reference to \'{varname}\'')
-        if not symbol.type.equal_to(variable_type[type]):
-            if type.is_procedure(): raise Exception(f'\'{varname}\' is not callable')
-            else: raise Exception(f'Unmatched type for variable {varname}, expected: {variable_type_str[type]}')
+        if symbol.type.is_param(): return symbol
+
+        if vartype == 'p' and not symbol.type.is_procedure():
+            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not callable') 
+        elif vartype == 'a' and not symbol.type.is_array():
+            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not an array')
+        elif vartype == 'q' and not symbol.type.is_quantum():
+            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not quantum')
+        elif vartype == 'c' and not symbol.type.is_classical():
+            raise Exception(f'{type(symbol.type).__name__} variable \'{varname}\' is not a non-array classical variable')
+        
         return symbol
 
     def enter_scope(self):

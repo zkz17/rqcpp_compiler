@@ -57,6 +57,10 @@ def main():
     ## Semantic Analysis.
     analyzer = RQCAnalyzer(ast)
     analyzer.analyze()
+    if DEBUG:
+        print(' ****** ****** Symbol Table ****** ******')
+        ast._symbols.print()
+        print()
 
     ## High-Level Transformation. 
     transformer = RQCTransformer()

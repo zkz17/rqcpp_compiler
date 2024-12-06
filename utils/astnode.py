@@ -22,6 +22,7 @@ class TopNode(ASTNode):
         self._entry = entry
         self._procs = procs
         self._qregs = qregs
+        self._symbols = SymbolTable()
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -181,7 +182,7 @@ class SkipStmtNode(ASTNode):
         return isinstance(node, SkipStmtNode)
 
 class AssignNode(ASTNode):
-    # left: IDNode
+    # left: IDNode or ArrayElementNode
     # right: CValueNode
     def __init__(self, left, right):
         self._left = left
@@ -350,6 +351,34 @@ class CValueNode(ASTNode):
 
     def equal_to(self, node):
         return isinstance(node, CValueNode) and self.value() == node.value()
+    
+class ListNode(CValueNode):
+    # cvals: [ CValueNode ]
+    def __init__(self, cvals):
+        self._cvals = cvals
+
+    def print(self, level=0, end='\n'):
+        print('[ListNode: ', end='')
+        for cval in self._cvals:
+            cval.print(0, ' ')
+        print(']', end=end)
+
+    def equal_to(self, node):
+        if isinstance(node, CValueNode):
+            if len(self._cvals) == len(node._cvals):
+                for i in len(self._cvals):
+                    if not self._cvals[i].equal_to(node._cvals[i]): return False
+                return True
+            elif len(self._cvals) == 1:
+                for cval in node._cvals:
+                    if not self._cvals[0].equal_to(cval): return False
+                return True
+            elif len(node._cvals) == 1:
+                for cval in self._cvals:
+                    if not node._cvals[0].equal_to(cval): return False
+                return True
+            else: return False
+        else: return False
     
 class UnaOpNode(CValueNode):
     # right: CValueNode

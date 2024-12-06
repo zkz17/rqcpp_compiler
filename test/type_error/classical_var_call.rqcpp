@@ -1,0 +1,8 @@
+Qbits q[1]
+
+procedure P():
+    x = 1
+    x()
+
+procedure main():
+    P()
