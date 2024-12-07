@@ -1,4 +1,4 @@
-Qbits q[3]
+qbits q[3]
 
 procedure P(k, x):
     while k >= x do:

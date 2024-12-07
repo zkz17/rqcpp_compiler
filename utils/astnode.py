@@ -18,10 +18,12 @@ class TopNode(ASTNode):
     # entry: ProcNode
     # procs: [ ProcNode ]
     # qregs: [ QRegNode ]
-    def __init__(self, entry, procs, qregs):
+    # arrays: [ ArrayDeclNode ]
+    def __init__(self, entry, procs, qregs, arrays):
         self._entry = entry
         self._procs = procs
         self._qregs = qregs
+        self._arrays = arrays
         self._symbols = SymbolTable()
 
     def print(self, level=0, end='\n'):
@@ -33,6 +35,12 @@ class TopNode(ASTNode):
         print('  qregs: ')
         for qreg in self._qregs:
             qreg.print(level + 1)
+
+        ## print declared arrays
+        self.print_indent(level)
+        print('  arrays: ')
+        for array in self._arrays:
+            array.print(level + 1)
         
         ## print entry point
         self.print_indent(level)
@@ -304,6 +312,27 @@ class QRegNode(ASTNode):
         self.print_indent(level)
         print('  length: ', end='')
         self._length.print(level + 1)
+
+class ArrayDeclNode(ASTNode):
+    # id: IDNode
+    # dimensions: [ CValueNode ]
+    def __init__(self, id, dimensions):
+        self._id = id
+        self._dimensions = dimensions
+
+    def print(self, level=0, end='\n'):
+        self.print_indent(level)
+        print('ArrayDeclNode')
+
+        self.print_indent(level)
+        print('  id: ', end='')
+        self._id.print(level + 1)
+
+        self.print_indent(level)
+        print('  dimensions: ', end='')
+        for dimension in self._dimensions:
+            dimension.print(0, ' ')
+        print()
 
 class NumNode(ASTNode):
     # value: int

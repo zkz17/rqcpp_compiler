@@ -1,4 +1,4 @@
-Qbits q[x + 3]
+qbits q[x + 3]
 
 procedure P():
     begin local x = 1, z = 3:

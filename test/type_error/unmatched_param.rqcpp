@@ -1,4 +1,4 @@
-Qbits q[1]
+qbits q[1]
 
 procedure P(x):
     skip

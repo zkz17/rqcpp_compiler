@@ -1,4 +1,4 @@
-Qbits q[3], t[1]
+qbits q[3], t[1]
 
 procedure Q(x):
     if x == 0 then:

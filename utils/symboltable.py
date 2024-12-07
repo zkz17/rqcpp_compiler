@@ -27,7 +27,7 @@ class SymbolTable:
             return self.table[name]
         elif self.parent:
             symbol = self.parent.resolve(name)
-            if symbol and (symbol.type.is_classical() or symbol.type.is_array()):
+            if symbol and symbol.type.is_classical():
                 self.free_var[symbol.name] = symbol
             return symbol
         else: 

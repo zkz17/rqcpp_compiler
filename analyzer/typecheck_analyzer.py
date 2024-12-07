@@ -44,14 +44,13 @@ class TypeCheckAnalyzer(Analyzer):
     def visit_SingletonNode(self, singleton):
         if isinstance(singleton._value, IDNode):
             symbol = self.get_symbol(singleton._value._id)
-            if not symbol.type.is_classical() and not symbol.type.is_param():
+            if not symbol.type.is_classical():
                 raise Exception(f'{type(symbol.type).__name__} variable \'{symbol.name}\' is not a non-array classical variable')
         elif isinstance(singleton._value, ArrayElementNode):
             array = singleton._value
             symbol = self.get_symbol(array._id._id)
             arraytype = symbol.type
             while isinstance(array, ArrayElementNode):
-                if arraytype.is_param(): return
                 if not arraytype.is_array():
                     raise Exception(f'Insufficient dimensions for {type(symbol.type).__name__} variable \'{symbol.name}\'')
                 array = array._array

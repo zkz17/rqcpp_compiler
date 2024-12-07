@@ -27,6 +27,7 @@ class RQCParser:
     
     def program(self):
         qregs = []
+        arrays = []
         procs = []
         entry = None
 
@@ -35,6 +36,8 @@ class RQCParser:
             self.consume('NEWLINE')
             if self.current_token() and self.current_token().type == 'QBITS': # Qubit register declaration
                 qregs += self.qregs()
+            elif self.current_token() and self.current_token().type == 'ARRAY': # Classical array declaration
+                arrays += self.arrays()
             elif self.current_token() and self.current_token().type == 'PROCEDURE': # Procedure declaration
                 self.consume('PROCEDURE')
                 if self.current_token() and self.current_token().type == 'MAIN':
@@ -45,7 +48,7 @@ class RQCParser:
 
             newline = self.current_token()
 
-        return TopNode(entry, procs, qregs)
+        return TopNode(entry, procs, qregs, arrays)
     
     def main(self):
         self.consume('MAIN')
@@ -54,6 +57,52 @@ class RQCParser:
         self.consume('COLON')
         body = self.block_statement()
         return ProcNode(IDNode('main'), [], body)
+
+    def qregs(self):
+        qregs = []
+        self.consume('QBITS')
+        token = self.consume('ID')
+        id = IDNode(str(token.value))
+
+        while True: # parallel definition divided by COMMA
+            token = self.current_token()
+            if token.type == 'LBRACKET': 
+                self.consume('LBRACKET')
+                length = self.classical_expr()
+                self.consume('RBRACKET')
+                qregs.append(QRegNode(id, length))
+                    
+            if self.current_token().type == 'COMMA':
+                self.consume('COMMA')
+                token = self.consume('ID')
+                id = IDNode(str(token.value))
+            else: 
+                break
+        return qregs
+
+    def arrays(self):
+        arrays = []
+        self.consume('ARRAY')
+        token = self.consume('ID')
+        id = IDNode(str(token.value))
+
+        while True: # parallel definition divided by COMMA
+            dimensions = []
+            token = self.current_token()
+            while token.type == 'LBRACKET': 
+                self.consume('LBRACKET')
+                dimensions.append(self.classical_expr())
+                self.consume('RBRACKET')
+                token = self.current_token()
+            arrays.append(ArrayDeclNode(id, dimensions))
+                    
+            if self.current_token().type == 'COMMA':
+                self.consume('COMMA')
+                token = self.consume('ID')
+                id = IDNode(str(token.value))
+            else: 
+                break
+        return arrays
     
     def procedure(self):
         token = self.consume('ID')
@@ -223,28 +272,6 @@ class RQCParser:
             range = self.range()
             self.consume('RBRACKET')
         return QBitNode(qreg, range)
-
-    def qregs(self):
-        qregs = []
-        self.consume('QBITS')
-        token = self.consume('ID')
-        id = IDNode(str(token.value))
-
-        while True: # parallel definition divided by COMMA
-            token = self.current_token()
-            if token.type == 'LBRACKET': 
-                self.consume('LBRACKET')
-                length = self.classical_expr()
-                self.consume('RBRACKET')
-                qregs.append(QRegNode(id, length))
-                    
-            if self.current_token().type == 'COMMA':
-                self.consume('COMMA')
-                token = self.consume('ID')
-                id = IDNode(str(token.value))
-            else: 
-                break
-        return qregs
     
     def range(self):
         if self.current_token() and self.current_token().type == 'COLON':

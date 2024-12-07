@@ -11,6 +11,7 @@ class ScopeAnalyzer(Analyzer):
     def analyze(self, ast):
         self.register_procs(ast)
         self.register_qregs(ast)
+        self.register_arrays(ast)
         self.visit(ast)
         ast._symbols = self.global_scope
 
@@ -21,6 +22,13 @@ class ScopeAnalyzer(Analyzer):
     def register_qregs(self, topnode):
         for qreg in topnode._qregs:
             self.global_scope.define(qreg._id._id, QuantumType())
+
+    def register_arrays(self, topnode):
+        for array in topnode._arrays:
+            etype = ClassicalType()
+            for dimension in array._dimensions:
+                etype = ArrayType(etype, dimension.value())
+            self.global_scope.define(array._id._id, etype)
 
     def visit_BlockNode(self, block):
         for stmt in block._statements:
@@ -65,11 +73,10 @@ class ScopeAnalyzer(Analyzer):
     def visit_AssignNode(self, assign):
         self.visit(assign._right)
         var = assign._left
-        vartype = ClassicalType()
-        while not isinstance(var, IDNode):
-            var = var._array
-            vartype = ArrayType(vartype)
-        self.current_scope.assign(var._id, vartype)
+        if isinstance(var, IDNode):
+            self.current_scope.assign(var._id, ClassicalType())
+        elif isinstance(var, ArrayElementNode):
+            self.get_symbol(var._id._id)
 
     def visit_CallNode(self, call):
         proc_name = call._id._id

@@ -1,4 +1,4 @@
-Qbits q[P]
+qbits q[P]
 
 procedure P():
     skip

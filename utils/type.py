@@ -28,6 +28,10 @@ class ProcParamType(Type):
     def is_param(self):
         return True
     
+    # Only classical param is allowed for now
+    def is_classical(self):
+        return True
+    
     def equal_to(self, type):
         return isinstance(type, ProcParamType)
     
