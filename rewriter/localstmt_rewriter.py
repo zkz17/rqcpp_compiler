@@ -3,8 +3,8 @@ from utils.astnode import *
 
 # Local Statement Rewrite class
 class LocalStmtRewriter(Rewriter):
-    def __init__(self, prefix='%'):
-        super().__init__(prefix)
+    def __init__(self, get_tempvar_name, free_tempvar_name):
+        super().__init__(get_tempvar_name, free_tempvar_name)
 
     def rewrite(self, ast):
         self.visit(ast)

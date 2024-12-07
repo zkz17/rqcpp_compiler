@@ -286,7 +286,7 @@ class RQCParser:
                 if self.current_token() and self.current_token().type != 'RBRACKET':
                     up = self.classical_expr()
                 return RangeNode(low, up)
-            else: return RangeNode(low, low)
+            else: return RangeNode(None, None, low)
 
     def list_expr(self):
         cvals = []

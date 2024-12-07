@@ -246,17 +246,24 @@ class UnitaryNode(ASTNode):
 class RangeNode(ASTNode):
     # low: CValueNode
     # up: CValueNode
-    def __init__(self, low, up):
+    # index: CValueNode
+    def __init__(self, low, up, index=None):
         self._low = low
         self._up = up
+        self._index = index
 
     def print(self, level=0, end='\n'):
-        print('[RangeNode: low = ', end='')
-        if self._low: self._low.print(0, ', ')
-        else: print('None, ', end='')
-        print('up = ', end='')
-        if self._up: self._up.print(0, ']' + end)
-        else: print('None]', end=end)
+        if self._index:
+            print('[RangeNode: index = ', end='')
+            self._index.print(0, '')
+            print(']', end=end)
+        else:
+            print('[RangeNode: low = ', end='')
+            if self._low: self._low.print(0, ', ')
+            else: print('None, ', end='')
+            print('up = ', end='')
+            if self._up: self._up.print(0, ']' + end)
+            else: print('None]', end=end)
 
 class ArrayElementNode(ASTNode):
     # id: IDNode

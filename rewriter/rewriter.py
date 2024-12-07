@@ -2,10 +2,9 @@ from utils.astnode import *
 
 # AST Rewriter abstract class
 class Rewriter: 
-    def __init__(self, prefix):
-        self.temp_var_prefix = prefix
-        self.temp_var_counter = 0
-        self.available_temp_name = []
+    def __init__(self, get_tempvar_name, free_tempvar_name):
+        self.get_tempvar_name = get_tempvar_name
+        self.free_tempvar_name = free_tempvar_name
 
     def rewrite(self, ast):
         pass
@@ -30,14 +29,3 @@ class Rewriter:
             elif isinstance(child, ASTNode): 
                 return_list += self.visit(child)
         return return_list
-    
-    def get_tempvar_name(self):
-        if len(self.available_temp_name):
-            return self.available_temp_name.pop()
-        name = self.temp_var_prefix + str(self.temp_var_counter)
-        self.temp_var_counter += 1
-        return name
-    
-    def free_tempvar_name(self, names):
-        if isinstance(names, list): self.available_temp_name += names
-        else: self.available_temp_name.append(names)

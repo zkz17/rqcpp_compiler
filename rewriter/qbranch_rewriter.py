@@ -3,14 +3,15 @@ from utils.astnode import *
 
 # Quantum Branch Rewrite class
 class QBranchRewriter(Rewriter):
-    def __init__(self, prefix='#'):
-        super().__init__(prefix)
-        self.zero_proc = False
+    def __init__(self, get_tempvar_name, default_proc_name='#_'):
+        super().__init__(get_tempvar_name, None)
+        self.default_proc_name = default_proc_name
+        self.default_proc = False
 
     def rewrite(self, ast):
         ast._procs += self.visit(ast)
-        if self.zero_proc:
-            ast._procs.append(ProcNode(IDNode(self.temp_var_prefix + '_'), [], BlockNode([SkipStmtNode()])))
+        if self.default_proc:
+            ast._procs.append(ProcNode(IDNode(self.default_proc_name), [], BlockNode([SkipStmtNode()])))
             
     def visit_QifStmtNode(self, qifstmt):
         new_procs = []
@@ -19,16 +20,15 @@ class QBranchRewriter(Rewriter):
             new_procs += self.visit(body)
             new_proc, new_call = self.construct_proc(body)
             new_branches.append((_, new_call))
-            if new_proc and new_proc._id._id != self.temp_var_prefix + '_': new_procs.append(new_proc)
+            if new_proc and new_proc._id._id != self.default_proc_name: new_procs.append(new_proc)
 
         qifstmt._branches = new_branches
         return new_procs
     
     def construct_proc(self, block): 
         if len(block._statements) == 1 and isinstance(block._statements[0], SkipStmtNode):
-            proc_name = self.temp_var_prefix + '_'
-            self.zero_proc = True
-            return ProcNode(IDNode(proc_name), [], block), CallNode(IDNode(proc_name), [])
+            self.default_proc = True
+            return ProcNode(IDNode(self.default_proc_name), [], block), CallNode(IDNode(self.default_proc_name), [])
         elif len(block._statements) == 1 and isinstance(block._statements[0], CallNode):
             ## No need to rewrite. 
             return None, block._statements[0]
