@@ -22,10 +22,12 @@ class LocalStmtRewriter(Rewriter):
         new_statements = []
         restore_statements = []
         for assign in localstmt._localvars:
-            tempvar = IDNode(self.get_tempvar_name())
-            new_statements.append(AssignNode(tempvar, SingletonNode(assign._left)))
+            if localstmt._body._symbols.parent.resolve(assign._left._id):
+                tempvar = IDNode(self.get_tempvar_name())
+                new_statements.append(AssignNode(tempvar, SingletonNode(assign._left)))
+                restore_statements.append(AssignNode(assign._left, SingletonNode(tempvar)))
             new_statements.append(assign)
-            restore_statements.append(AssignNode(assign._left, SingletonNode(tempvar)))
+            
         self.visit(localstmt._body)
         new_statements += localstmt._body._statements
         new_statements += restore_statements
