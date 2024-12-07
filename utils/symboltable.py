@@ -45,7 +45,15 @@ class SymbolTable:
         print('{')
         for name, symbol in self.table.items():
             self.print_indent(level + 1)
-            print(f'{name}: {type(symbol.type).__name__}')
+            if not symbol.type.is_array(): print(f'{name}: {type(symbol.type).__name__}')
+            else:
+                vartype = symbol.type
+                print(f'{name}: {type(symbol.type).__name__}', end='')
+                dims = ''
+                while vartype.is_array():
+                    dims = f'[{vartype.length}]' + dims
+                    vartype = vartype.element_type
+                print(dims)
 
         for child in self.children:
             child.print(level + 1)

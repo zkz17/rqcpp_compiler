@@ -16,13 +16,48 @@ class TypeCheckAnalyzer(Analyzer):
         length = qreg._length.value()
         if not length:
             raise Exception(f'Non-determined legnth for quantum register {qreg._id._id}')
+        if length <= 0:
+            raise Exception(f'Quantum register {qreg._id._id} must have a positive length')
         qreg._length = SingletonNode(NumNode(length))
+
+    def visit_ArrayDeclNode(self, array):
+        for dimension in array._dimensions:
+            if not dimension.value():
+                raise Exception(f'Non-determined length for classical array {array._id._id}')
+            if dimension.value() <= 0:
+                raise Exception(f'Classical array {array._id._id} must have a positive length')
 
     def visit_BlockNode(self, block):
         self.enter_scope(block)
         for stmt in block._statements:
             self.visit(stmt)
         self.exit_scope()
+
+    def visit_AssignNode(self, assign):
+        if isinstance(assign._left, IDNode):
+            self.visit(assign._right)
+        elif isinstance(assign._left, ArrayElementNode):
+            symbol = self.get_symbol(assign._left._id._id)
+            arraytype = symbol.type
+            array = assign._left
+            while isinstance(array, ArrayElementNode):
+                if not arraytype.is_array():
+                    raise Exception(f'Insufficient dimensions for {type(symbol.type).__name__} variable \'{symbol.name}\'')
+                array = array._array
+                arraytype = arraytype.element_type
+
+            if arraytype.is_classical():
+                if isinstance(assign._right, ListNode):
+                    raise Exception(f'Unmatched dimensions for assignment of variable {symbol.name}')
+                self.visit(assign._right)
+            elif arraytype.is_array():
+                if not arraytype.element_type.is_classical():
+                    raise Exception(f'Assignment of more-than-two-dimensional array {symbol.name} is prohibited')
+                if not isinstance(assign._right, ListNode):
+                    raise Exception(f'Unmatched dimensions for assignment of variable {symbol.name}')
+                if arraytype.length != len(assign._right._cvals):
+                    raise Exception(f'Unmatched number of elements for assignment of variable {symbol.name}')
+                self.visit(assign._right)
 
     def visit_CallNode(self, call):
         proc_name = call._id._id
@@ -55,5 +90,5 @@ class TypeCheckAnalyzer(Analyzer):
                     raise Exception(f'Insufficient dimensions for {type(symbol.type).__name__} variable \'{symbol.name}\'')
                 array = array._array
                 arraytype = arraytype.element_type
-            if not arraytype.is_classical()and not arraytype.is_param():
+            if not arraytype.is_classical():
                 raise Exception(f'Unable to convert variable {symbol.name} into a non-array classical value')
