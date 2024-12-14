@@ -15,17 +15,17 @@ class TypeCheckAnalyzer(Analyzer):
     def visit_QRegNode(self, qreg):
         length = qreg._length.value()
         if not length:
-            raise Exception(f'Non-determined legnth for quantum register {qreg._id._id}')
+            raise Exception(f'Non-determined legnth for quantum register {qreg._name()}')
         if length <= 0:
-            raise Exception(f'Quantum register {qreg._id._id} must have a positive length')
+            raise Exception(f'Quantum register {qreg.name()} must have a positive length')
         qreg._length = SingletonNode(NumNode(length))
 
     def visit_ArrayDeclNode(self, array):
         for dimension in array._dimensions:
             if not dimension.value():
-                raise Exception(f'Non-determined length for classical array {array._id._id}')
+                raise Exception(f'Non-determined length for classical array {array.name()}')
             if dimension.value() <= 0:
-                raise Exception(f'Classical array {array._id._id} must have a positive length')
+                raise Exception(f'Classical array {array.name()} must have a positive length')
 
     def visit_BlockNode(self, block):
         self.enter_scope(block)
@@ -37,7 +37,7 @@ class TypeCheckAnalyzer(Analyzer):
         if isinstance(assign._left, IDNode):
             self.visit(assign._right)
         elif isinstance(assign._left, ArrayElementNode):
-            symbol = self.get_symbol(assign._left._id._id)
+            symbol = self.get_symbol(assign._left.name())
             arraytype = symbol.type
             array = assign._left
             while isinstance(array, ArrayElementNode):
@@ -60,7 +60,7 @@ class TypeCheckAnalyzer(Analyzer):
                 self.visit(assign._right)
 
     def visit_CallNode(self, call):
-        proc_name = call._id._id
+        proc_name = call.name()
         symbol = self.get_symbol(proc_name)
         if not symbol.type.is_procedure(): 
             raise Exception(f'{type(symbol.type).__name__} variable \'{proc_name}\' is not callable') 
@@ -71,19 +71,19 @@ class TypeCheckAnalyzer(Analyzer):
             self.visit(param)
 
     def visit_QBitNode(self, qbit):
-        symbol = self.get_symbol(qbit._qreg._id)
+        symbol = self.get_symbol(qbit.name())
         if not symbol.type.is_quantum():
             raise Exception(f'{type(symbol.type).__name__} variable \'{symbol.name}\' is not quantum')
         self.visit(qbit._range)
 
     def visit_SingletonNode(self, singleton):
         if isinstance(singleton._value, IDNode):
-            symbol = self.get_symbol(singleton._value._id)
+            symbol = self.get_symbol(singleton._value.name())
             if not symbol.type.is_classical():
                 raise Exception(f'{type(symbol.type).__name__} variable \'{symbol.name}\' is not a non-array classical variable')
         elif isinstance(singleton._value, ArrayElementNode):
             array = singleton._value
-            symbol = self.get_symbol(array._id._id)
+            symbol = self.get_symbol(array.name())
             arraytype = symbol.type
             while isinstance(array, ArrayElementNode):
                 if not arraytype.is_array():

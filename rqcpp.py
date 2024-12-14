@@ -72,7 +72,11 @@ def main():
 
     ## Code Generation.
     generator = RQCGenerator()
-    generator.generate(ast)
+    code = generator.generate(ast)
+    if DEBUG:
+        print(' ****** ****** QINS Code ****** ******')
+        code.print()
+        print()
 
 if __name__ == "__main__": 
     main()

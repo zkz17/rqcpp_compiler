@@ -14,6 +14,9 @@ class ASTNode:
     def equal_to(self, node):
         return False
     
+    def name(self):
+        return ''
+    
 class TopNode(ASTNode):
     # entry: ProcNode
     # procs: [ ProcNode ]
@@ -80,6 +83,9 @@ class ProcNode(ASTNode):
         print('  body: ', end='')
         self._body.print(level + 1)
 
+    def name(self):
+        return self._id.name()
+
 class BlockNode(ASTNode):
     # statements: [ IfStmtNode | QifStmtNode | LocalStmtNode | WhileStmtNode | SkipStmtNode | AssignNode | UnitaryNode | CallNode ]
     def __init__(self, statements):
@@ -92,17 +98,22 @@ class BlockNode(ASTNode):
             stmt.print(level)
 
 class IfStmtNode(ASTNode):
-    # branches: [ (CValueNode: BlockNode) ]
+    # branches: [ (cond: CValueNode, body: BlockNode, pre: BlockNode) ]
     def __init__(self, branches):
         self._branches = branches
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
         print('IfStmtNode')
-        for cond, body in self._branches:
+        for cond, body, pre in self._branches:
+            if pre:
+                self.print_indent(level)
+                print('  preprocess: ', end='')
+                pre.print(level + 1)
+
             self.print_indent(level)
             if cond:
-                print('  cond: ', end='')
+                print('  ->cond: ', end='')
                 cond.print(0)
             else: 
                 print('  else: ')
@@ -114,9 +125,11 @@ class IfStmtNode(ASTNode):
 class WhileStmtNode(ASTNode):
     # cond: CValueNode
     # body: BlockNode
-    def __init__(self, cond, body):
+    # pre: BlockNode
+    def __init__(self, cond, body, pre=None):
         self._cond = cond
         self._body = body
+        self._pre = pre
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -125,6 +138,11 @@ class WhileStmtNode(ASTNode):
         self.print_indent(level)
         print('  cond: ', end='')
         self._cond.print(0)
+
+        if self._pre:
+            self.print_indent(level)
+            print('  preprocess: ', end='')
+            self._pre.print(level + 1)
 
         self.print_indent(level)
         print('  body: ', end='')
@@ -223,6 +241,9 @@ class CallNode(ASTNode):
             param.print(0, ' ')
         print()
 
+    def name(self):
+        return self._id.name()
+
 class UnitaryNode(ASTNode):
     # gate: BasicGateNode
     # qbits: [ QBitNode ]
@@ -242,6 +263,9 @@ class UnitaryNode(ASTNode):
         print('  qbits: ')
         for qbit in self._qbits:
             qbit.print(level + 1)
+
+    def name(self):
+        return self._gate.name()
 
 class RangeNode(ASTNode):
     # low: CValueNode
@@ -282,6 +306,9 @@ class ArrayElementNode(ASTNode):
         self._range.print(0, '')
         print(']', end=end)
 
+    def name(self):
+        return self._id.name()
+
 class QBitNode(ASTNode):
     # qreg: IDNode
     # range: RangeNode
@@ -301,6 +328,9 @@ class QBitNode(ASTNode):
         print('  range: ', end='')
         self._range.print(level + 1)
 
+    def name(self):
+        return self._qreg.name()
+
 class QRegNode(ASTNode):
     # id: IDNode
     # length: CValueNode
@@ -319,6 +349,9 @@ class QRegNode(ASTNode):
         self.print_indent(level)
         print('  length: ', end='')
         self._length.print(level + 1)
+
+    def name(self):
+        return self._id.name()
 
 class ArrayDeclNode(ASTNode):
     # id: IDNode
@@ -340,6 +373,9 @@ class ArrayDeclNode(ASTNode):
         for dimension in self._dimensions:
             dimension.print(0, ' ')
         print()
+
+    def name(self):
+        return self._id.name()
 
 class NumNode(ASTNode):
     # value: int
@@ -363,6 +399,16 @@ class IDNode(ASTNode):
     def equal_to(self, node):
         return isinstance(node, IDNode) and self._id == node._id
     
+    def name(self):
+        return self._id
+        
+class UndefinedNode(ASTNode):
+    def __init__(self):
+        pass
+    
+    def print(self, level=0, end='\n'):
+        print('[UndefinedNode]', end=end)
+    
 class BasicGateNode(IDNode):
     # id: str
     def __init__(self, id):
@@ -373,6 +419,9 @@ class BasicGateNode(IDNode):
 
     def equal_to(self, node):
         return isinstance(node, BasicGateNode) and self._id == node._id
+    
+    def name(self):
+        return self._id
 
 class CValueNode(ASTNode):
     # abstract node of classical value
@@ -540,6 +589,11 @@ class SingletonNode(CValueNode):
         else:
             raise Exception('Empty oprand')
         
+    def name(self):
+        if isinstance(self._value, IDNode):
+            return self._value.name()
+        return ''
+        
 class ProcParamNode(CValueNode):
     # id: IDNode
     def __init__(self, id):
@@ -550,13 +604,3 @@ class ProcParamNode(CValueNode):
 
     def print(self, level=0, end='\n'):
         print('[ProcParamNode: param ' + str(self._id._id) + ']', end=end)
-        
-class UndefinedNode(CValueNode):
-    def __init__(self):
-        pass
-
-    def value(self):
-        return None
-    
-    def print(self, level=0, end='\n'):
-        print('[UndefinedNode]', end=end)

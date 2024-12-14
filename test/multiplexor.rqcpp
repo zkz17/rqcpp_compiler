@@ -1,4 +1,4 @@
-qbits q[3], t[1]
+qbits q[3], t[2]
 
 procedure Q(x):
     if x == 0 then:
@@ -28,7 +28,7 @@ procedure P(k, x):
                 x = 2
                 w = x + y
             |4> -> 
-                H(t[0])
+                CNOT(t[0], t[1])
             |5> -> 
                 x = 4
                 w = y + z

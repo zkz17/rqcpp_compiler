@@ -2,7 +2,7 @@ from rewriter.rewriter import Rewriter
 from utils.astnode import *
 
 # Expression Extraction Rewrite class
-class ExprExtractRewriter(Rewriter):
+class CondExtractRewriter(Rewriter):
     def __init__(self, get_tempvar_name, free_tempvar_name):
         super().__init__(get_tempvar_name, free_tempvar_name)
 
@@ -21,44 +21,38 @@ class ExprExtractRewriter(Rewriter):
     
     def visit_IfStmtNode(self, ifstmt):
         #used_tempvar_name = []
-        new_statements = []
         new_branches = []
 
-        for cond, body in ifstmt._branches:
+        for cond, body, _ in ifstmt._branches:
             if cond and not isinstance(cond, SingletonNode):
                 tempvar_name = self.get_tempvar_name()
                 #used_tempvar_name.append(tempvar_name)
 
                 tempvar = IDNode(tempvar_name)
-                new_statements.append(AssignNode(tempvar, cond))
                 self.visit(body)
-                new_branches.append((SingletonNode(tempvar), body))
+                new_branches.append((SingletonNode(tempvar), body, BlockNode([AssignNode(tempvar, cond)])))
             else: 
                 self.visit(body)
-                new_branches.append((cond, body))
+                new_branches.append((cond, body, None))
 
         ifstmt._branches = new_branches
-        new_statements.append(ifstmt)
         #self.free_tempvar_name(used_tempvar_name)
-        return new_statements
+        return [ifstmt]
     
     def visit_WhileStmtNode(self, whilestmt):
         #used_tempvar_name = []
-        new_statements = []
 
         if whilestmt._cond and not isinstance(whilestmt._cond, SingletonNode):
             tempvar_name = self.get_tempvar_name()
             #used_tempvar_name.append(tempvar_name)
 
             tempvar = IDNode(tempvar_name)
-            new_statements.append(AssignNode(tempvar, whilestmt._cond))
+            whilestmt._pre = BlockNode([AssignNode(tempvar, whilestmt._cond)])
             whilestmt._cond = SingletonNode(tempvar)
-            whilestmt._body._statements.append(new_statements[0])
 
         self.visit(whilestmt._body)
-        new_statements.append(whilestmt)
         #self.free_tempvar_name(used_tempvar_name)
-        return new_statements
+        return [whilestmt]
     
     def visit_QifStmtNode(self, qifstmt):
         #used_tempvar_name = []

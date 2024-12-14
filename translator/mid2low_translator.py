@@ -3,5 +3,5 @@ class Mid2LowTransLator:
     def __init__(self):
         pass
 
-    def translate(self, ast):
-        pass
+    def translate(self, code):
+        return code

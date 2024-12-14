@@ -22,7 +22,7 @@ class ExprSplitRewriter(Rewriter):
     def visit_AssignNode(self, assign):
         new_statements, _ = self.split_cvalue(assign._right)
         if len(new_statements): 
-            self.free_tempvar_name(new_statements[-1]._left._id)
+            self.free_tempvar_name(new_statements[-1]._left.name())
             new_statements[-1]._left = assign._left
         return new_statements
     

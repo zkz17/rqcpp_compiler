@@ -20,7 +20,7 @@ class QBranchRewriter(Rewriter):
             new_procs += self.visit(body)
             new_proc, new_call = self.construct_proc(body)
             new_branches.append((_, new_call))
-            if new_proc and new_proc._id._id != self.default_proc_name: new_procs.append(new_proc)
+            if new_proc and new_proc.name() != self.default_proc_name: new_procs.append(new_proc)
 
         qifstmt._branches = new_branches
         return new_procs

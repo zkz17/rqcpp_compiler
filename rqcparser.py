@@ -189,17 +189,17 @@ class RQCParser:
         self.consume('THEN')
         self.consume('COLON')
         body = self.block_statement()
-        branches.append((cond, body))
+        branches.append((cond, body, None))
         self.consume('NEWLINE')
 
         ## Parse optional 'elif' condition and body
         while self.current_token() and self.current_token().type == 'ELIF':
             self.consume('ELIF')
-            cond = self.expr_boolean()
+            cond = (self.expr_boolean())
             self.consume('THEN')
             self.consume('COLON')
             body = self.block_statement()
-            branches.append((cond, body))
+            branches.append((cond, body, None))
             self.consume('NEWLINE')
 
         ## Parse optional 'else' condition and body
@@ -207,7 +207,7 @@ class RQCParser:
             self.consume('ELSE')
             self.consume('COLON')
             body = self.block_statement()
-            branches.append((None, body))
+            branches.append((None, body, None))
             self.consume('NEWLINE')
 
         self.consume('FI')

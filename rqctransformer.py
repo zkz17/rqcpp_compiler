@@ -25,8 +25,8 @@ class RQCTransformer:
         rewriter.rewrite(ast)
 
     def expr_extract_rewrite(self, ast):
-        from rewriter.exprextract_rewriter import ExprExtractRewriter
-        rewriter = ExprExtractRewriter(self.get_tempvar_name, self.free_tempvar_name)
+        from rewriter.condextract_rewriter import CondExtractRewriter
+        rewriter = CondExtractRewriter(self.get_tempvar_name, self.free_tempvar_name)
         rewriter.rewrite(ast)
 
     def quantum_branch_rewrite(self, ast):

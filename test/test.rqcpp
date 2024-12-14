@@ -1,7 +1,7 @@
 qbits q[3]
 
 procedure P(k, x):
-    while k >= x do:
+    while k >= x and x >= 1 do:
         H(q[k])
         k = k - 1
     od

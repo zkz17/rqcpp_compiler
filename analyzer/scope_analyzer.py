@@ -17,18 +17,18 @@ class ScopeAnalyzer(Analyzer):
 
     def register_procs(self, topnode):
         for proc in topnode._procs:
-            self.global_scope.define(proc._id._id, ProcedureType(len(proc._params)))
+            self.global_scope.define(proc.name(), ProcedureType(len(proc._params)))
 
     def register_qregs(self, topnode):
         for qreg in topnode._qregs:
-            self.global_scope.define(qreg._id._id, QuantumType())
+            self.global_scope.define(qreg.name(), QuantumType())
 
     def register_arrays(self, topnode):
         for array in topnode._arrays:
             etype = ClassicalType()
             for dimension in array._dimensions:
                 etype = ArrayType(etype, dimension.value())
-            self.global_scope.define(array._id._id, etype)
+            self.global_scope.define(array.name(), etype)
 
     def visit_BlockNode(self, block):
         for stmt in block._statements:
@@ -44,7 +44,7 @@ class ScopeAnalyzer(Analyzer):
         self.exit_scope()
 
     def visit_IfStmtNode(self, ifstmt):
-        for cond, body in ifstmt._branches:
+        for cond, body, _ in ifstmt._branches:
             if cond: self.visit(cond)
             self.enter_scope()
             self.visit(body)
@@ -74,12 +74,12 @@ class ScopeAnalyzer(Analyzer):
         self.visit(assign._right)
         var = assign._left
         if isinstance(var, IDNode):
-            self.current_scope.assign(var._id, ClassicalType())
+            self.current_scope.assign(var.name(), ClassicalType())
         elif isinstance(var, ArrayElementNode):
-            self.get_symbol(var._id._id)
+            self.get_symbol(var.name())
 
     def visit_CallNode(self, call):
-        proc_name = call._id._id
+        proc_name = call.name()
         self.get_symbol(proc_name)
 
         for param in call._params:
@@ -90,7 +90,7 @@ class ScopeAnalyzer(Analyzer):
             self.visit(qbit)
 
     def visit_QBitNode(self, qbit):
-        self.get_symbol(qbit._qreg._id)
+        self.get_symbol(qbit.name())
         self.visit(qbit._range)
 
     def visit_RangeNode(self, range):
