@@ -21,7 +21,7 @@ class IndexExtractRewriter(Rewriter):
     def visit_RangeNode(self, range):
         new_statements = []
         if range._index:
-            if not (isinstance(range._index, SingletonNode) and isinstance(range._index._value, IDNode)):
+            if not isinstance(range._index, SingletonNode):
                 tempvar_name = self.get_tempvar_name()
                 tempvar = IDNode(tempvar_name)
 

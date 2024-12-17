@@ -15,25 +15,14 @@ procedure P(k, x):
     if k == 0 then:
         Q(x)
     else:
-        y = 3
-        z = y + 2
         qif q[k]:
             |0> -> 
                 P(k-1, 2*x)
             |1> -> 
                 P(k-1, 2*x+1)
-            |2> -> 
-                skip
-            |3> -> 
-                x = 2
-                w = x + y
-            |4> -> 
-                CNOT(t[0], t[1])
-            |5> -> 
-                x = 4
-                w = y + z
         fiq
     fi
 
 procedure main():
-    P(3, 0)
+    x = 0
+    P(3, x)

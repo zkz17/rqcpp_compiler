@@ -105,15 +105,20 @@ class Sub(Rins):
         self.r2 = r2
     
 class Negation(Rins):
-    def __init__(self, r1):
+    def __init__(self, reg):
         self.opcode = 12
-        self.r1 = r1
+        self.reg= reg
+
+    def to_string(self):
+        return f'neg({self.reg})'
     
-class SwapBranch(Rins):
-    def __init__(self, br, r1):
+class SwapBr(Rins):
+    def __init__(self, reg):
         self.opcode = 13
-        self.br = br
-        self.r1 = r1
+        self.reg = reg
+
+    def to_string(self):
+        return f'swbr({self.reg})'
     
 class Qif(Rins):
     def __init__(self, r1):

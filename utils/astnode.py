@@ -150,7 +150,7 @@ class WhileStmtNode(ASTNode):
 
 class QifStmtNode(ASTNode):
     # qbits: QBitNode
-    # branches: [ (int: BlockNode or CallNode) ]
+    # branches: { int: BlockNode or CallNode }
     def __init__(self, qbits, branches):
         self._qbits = qbits
         self._branches = branches
@@ -592,6 +592,8 @@ class SingletonNode(CValueNode):
     def name(self):
         if isinstance(self._value, IDNode):
             return self._value.name()
+        elif isinstance(self._value, NumNode):
+            return self._value._value
         return ''
         
 class ProcParamNode(CValueNode):

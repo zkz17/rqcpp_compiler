@@ -57,20 +57,22 @@ class Pop(MidIns):
         return f'pop({self.var})'
 
 class MidBranchEqZ(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, index=None):
         self.var = var
         self.label = label
+        self.index = index
 
     def to_string(self):
-        return f'bez({self.var}, {self.label})'
+        return f'bez({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
 
 class MidBranchNeqZ(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, index=None):
         self.var = var
         self.label = label
+        self.index = index
 
     def to_string(self):
-        return f'bnz({self.var}, {self.label})'
+        return f'bnz({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
 
 class MidBranch(MidIns):
     def __init__(self, label):
@@ -80,12 +82,13 @@ class MidBranch(MidIns):
         return f'bra({self.label})'
     
 class MidBranchControl(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, index=None):
         self.var = var
         self.label = label
+        self.index = index
 
     def to_string(self):
-        return f'brc({self.var}, {self.label})'
+        return f'brc({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
     
 class MidUnitary(MidIns):
     def __init__(self, gate, qreg, offset):
@@ -109,6 +112,14 @@ class MidUnitaryB(MidIns):
     def to_string(self):
         return f'unib({self.gate}, {self.qreg1}[{self.offset1}], {self.qreg2}[{self.offset2}])'
     
+class MidSwap(MidIns):
+    def __init__(self, var1, var2):
+        self.var1 = var1
+        self.var2 = var2
+
+    def to_string(self):
+        return f'swap({self.var1}, {self.var2})'
+    
 class MidAdd(MidIns):
     def __init__(self, var, incr):
         self.var = var
@@ -116,3 +127,62 @@ class MidAdd(MidIns):
 
     def to_string(self):
         return f'add({self.var}, {self.incr})'
+    
+class MidSub(MidIns):
+    def __init__(self, var, sub):
+        self.var = var
+        self.sub = sub
+
+    def to_string(self):
+        return f'sub({self.var}, {self.sub})'
+    
+class MidXori(MidIns):
+    def __init__(self, var, imm):
+        self.var = var
+        self.imm = imm
+
+    def to_string(self):
+        return f'xori({self.var}, {self.imm})'
+    
+class MidXor(MidIns):
+    def __init__(self, var1, var2):
+        self.var1 = var1
+        self.var2 = var2
+
+    def to_string(self):
+        return f'xor({self.var1}, {self.var2})'
+    
+class MidQif(MidIns):
+    def __init__(self, reg, index):
+        self.reg = reg
+        self.index = index
+
+    def to_string(self):
+        return f'qif({self.reg}[{self.index}])'
+    
+class MidFiq(MidIns):
+    def __init__(self, reg, index):
+        self.reg = reg
+        self.index = index
+
+    def to_string(self):
+        return f'fiq({self.reg}[{self.index}])'
+    
+class MidArithmetic(MidIns):
+    def __init__(self, op, var1, var2):
+        self.op = op
+        self.var1 = var1
+        self.var2 = var2
+
+    def to_string(self):
+        return f'ari({self.op}, {self.var1}, {self.var2})'
+    
+class MidArithmeticB(MidIns):
+    def __init__(self, op, var1, var2, var3):
+        self.op = op
+        self.var1 = var1
+        self.var2 = var2
+        self.var3 = var3
+
+    def to_string(self):
+        return f'ari({self.op}, {self.var1}, {self.var2}, {self.var3})'
