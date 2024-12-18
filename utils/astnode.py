@@ -97,10 +97,6 @@ class ProcNode(ASTNode):
         print('  body: ', end='')
         self._body.print(level + 1)
 
-    def name_in_array(self):
-        if self._index: return f'{self.name()}[{self._index._value}]'
-        return self.name()
-
     def name(self):
         return self._id.name()
 
@@ -259,9 +255,6 @@ class CallNode(ASTNode):
             param.print(0, ' ')
         print()
 
-    def name_in_array(self):
-        return self._callee.name_in_array()
-
     def name(self):
         return self._callee.name()
 
@@ -337,9 +330,6 @@ class ArrayElementNode(ASTNode):
         self._index.print(0, '')
         print(']', end=end)
 
-    def name_in_array(self):
-        return f'{self.name()}[{self._index.name()}]'
-
     def name(self):
         return self._id.name()
 
@@ -397,20 +387,21 @@ class NumNode(ASTNode):
 
     def equal_to(self, node):
         return isinstance(node, NumNode) and self._value == node._value
+    
+    def name(self):
+        return str(self._value)
 
 class IDNode(ASTNode):
     # id: str
     def __init__(self, id):
         self._id = id
+        self._index = None
 
     def print(self, level=0, end='\n'):
         print('[IDNode: ' + str(self._id) + ']', end=end)
 
     def equal_to(self, node):
         return isinstance(node, IDNode) and self._id == node._id
-
-    def name_in_array(self):
-        return self._id
     
     def name(self):
         return self._id
@@ -632,7 +623,7 @@ class SingletonNode(CValueNode):
         if isinstance(self._value, IDNode):
             return self._value.name()
         elif isinstance(self._value, NumNode):
-            return self._value._value
+            return str(self._value._value)
         return ''
         
 class ProcParamNode(CValueNode):

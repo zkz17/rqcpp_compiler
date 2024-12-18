@@ -5,7 +5,9 @@ procedure P[0](x, y):
     CNOT(q[x], q[y])
 
 procedure P[1](x, y):
-    skip
+    if x < 4 then:
+        P[x + 2](0, 1)
+    fi
 
 procedure P[2](x, y):
     H(q[x])

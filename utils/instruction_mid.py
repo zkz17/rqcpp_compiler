@@ -63,7 +63,7 @@ class MidBranchEqZ(MidIns):
         self.index = index
 
     def to_string(self):
-        return f'bez({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
+        return f'bez({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label.to_string()})'
 
 class MidBranchNeqZ(MidIns):
     def __init__(self, var, label, index=None):
@@ -72,14 +72,14 @@ class MidBranchNeqZ(MidIns):
         self.index = index
 
     def to_string(self):
-        return f'bnz({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
+        return f'bnz({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label.to_string()})'
 
 class MidBranch(MidIns):
     def __init__(self, label):
         self.label = label
 
     def to_string(self):
-        return f'bra({self.label})'
+        return f'bra({self.label.to_string()})'
     
 class MidBranchControl(MidIns):
     def __init__(self, var, label, index=None):
@@ -88,7 +88,7 @@ class MidBranchControl(MidIns):
         self.index = index
 
     def to_string(self):
-        return f'brc({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label})'
+        return f'brc({self.var}{'[' + str(self.index) + ']' if self.index else ''}, {self.label.to_string()})'
     
 class MidUnitary(MidIns):
     def __init__(self, gate, qreg, offset):

@@ -202,7 +202,7 @@ class High2MidTransLator:
         for param in call._params:
             self.emit(Push(param.name()))
 
-        self.emit(MidBranch(self.emitter.get_procentry_label(call)))
+        self.emit(MidBranch(self.emitter.get_procentry_label(call._callee)))
 
         for param in reversed(call._params):
             self.emit(Pop(param.name()))

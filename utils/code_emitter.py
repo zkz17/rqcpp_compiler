@@ -1,23 +1,19 @@
+from utils.label import Label
+
 class CodeList:
     def __init__(self):
         self.list = []
         self.line_counter = 1
-        self.label_table = {}
 
     def insert(self, inst, label=None):
         self.list.append((self.line_counter, label, inst))
-        if label: 
-            self.label_table[label] = self.line_counter
+        if label: label.set_line(self.line_counter)
         self.line_counter += 1
-
-    def lookup(self, label):
-        if not self.label_table[label]: raise Exception(f'Label {label} not found')
-        return self.label_table[label]
     
     def print(self):
         print(f'{'line':5}{'label':10}instruction')
         for line, label, inst in self.list:
-            print(f'{line:<5}{(label if label else ''):<10}{inst.to_string()}')
+            print(f'{line:<5}{(label.to_string() if label else ''):<10}{inst.to_string()}')
 
 # Code Emitter class
 class CodeEmitter:
@@ -37,7 +33,7 @@ class CodeEmitter:
     def get_new_label(self):
         label = self.tempvar_prefix + 'l' + str(self.label_counter)
         self.label_counter += 1
-        return label
+        return Label(label)
     
     def get_tempvar_name(self):
         if len(self.available_tempvar_name):
@@ -51,10 +47,10 @@ class CodeEmitter:
         else: self.available_tempvar_name.append(name)
     
     def get_procentry_label(self, proc):
-        return f'{proc.name_in_array()}.ent'
+        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.ent')
     
     def get_procbegin_label(self, proc):
-        return f'{proc.name_in_array()}.beg'
+        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.beg')
     
     def get_procend_label(self, proc):
-        return f'{proc.name_in_array()}.end'
+        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.end')
