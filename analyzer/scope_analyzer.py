@@ -91,7 +91,10 @@ class ScopeAnalyzer(Analyzer):
 
     def visit_QBitNode(self, qbit):
         self.get_symbol(qbit.name())
-        self.visit(qbit._range)
+        self.visit(qbit._index)
+
+    def visit_IndexNode(self, index):
+        self.visit(index._index)
 
     def visit_RangeNode(self, range):
         if range._low: self.visit(range._low)

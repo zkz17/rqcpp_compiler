@@ -47,17 +47,11 @@ class TypeCheckAnalyzer(Analyzer):
                 arraytype = arraytype.element_type
 
             if arraytype.is_classical():
-                if isinstance(assign._right, ListNode):
-                    raise Exception(f'Unmatched dimensions for assignment of variable {symbol.name}')
                 self.visit(assign._right)
             elif arraytype.is_array():
-                if not arraytype.element_type.is_classical():
-                    raise Exception(f'Assignment of more-than-two-dimensional array {symbol.name} is prohibited')
-                if not isinstance(assign._right, ListNode):
-                    raise Exception(f'Unmatched dimensions for assignment of variable {symbol.name}')
-                if arraytype.length != len(assign._right._cvals):
-                    raise Exception(f'Unmatched number of elements for assignment of variable {symbol.name}')
-                self.visit(assign._right)
+                # TODO 
+                # array assignment
+                raise Exception(f'Assignment of array {symbol.name} is prohibited')
 
     def visit_CallNode(self, call):
         proc_name = call.name()
@@ -74,7 +68,7 @@ class TypeCheckAnalyzer(Analyzer):
         symbol = self.get_symbol(qbit.name())
         if not symbol.type.is_quantum():
             raise Exception(f'{type(symbol.type).__name__} variable \'{symbol.name}\' is not quantum')
-        self.visit(qbit._range)
+        self.visit(qbit._index)
 
     def visit_SingletonNode(self, singleton):
         if isinstance(singleton._value, IDNode):

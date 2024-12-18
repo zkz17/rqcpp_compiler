@@ -18,6 +18,17 @@ class IndexExtractRewriter(Rewriter):
         block._statements = new_statements
         return []
     
+    def visit_IndexNode(self, index):
+        new_statements = []
+        if not isinstance(index._index, SingletonNode):
+            tempvar_name = self.get_tempvar_name()
+            tempvar = IDNode(tempvar_name)
+
+            new_statements.append(AssignNode(tempvar, index._index))
+            index._index = SingletonNode(tempvar)
+        return new_statements
+
+    '''
     def visit_RangeNode(self, range):
         new_statements = []
         if range._index:
@@ -41,3 +52,4 @@ class IndexExtractRewriter(Rewriter):
                 new_statements.append(AssignNode(tempvar, range._up))
                 range._up = SingletonNode(tempvar)
         return new_statements
+    '''

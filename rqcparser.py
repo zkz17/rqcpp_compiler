@@ -152,14 +152,8 @@ class RQCParser:
                 return id
             elif token.type == 'ASSIGN': # AssignNode
                 self.consume('ASSIGN')
-                if self.current_token() and self.current_token().type == 'LBRACKET': # ListNode
-                    self.consume('LBRACKET')
-                    right = self.list_expr()
-                    self.consume('RBRACKET')
-                    return AssignNode(id, right)
-                else:
-                    right = self.classical_expr()
-                    return AssignNode(id, right)
+                right = self.classical_expr()
+                return AssignNode(id, right)
             elif token.type == 'LPAREN': 
                 self.consume('LPAREN')
                 if isinstance(id, BasicGateNode): # UnitaryNode
@@ -266,13 +260,14 @@ class RQCParser:
 
     def qbit(self):
         qreg = IDNode(str(self.consume('ID').value))
-        range = RangeNode(None, None)
         if self.current_token() and self.current_token().type == 'LBRACKET':
             self.consume('LBRACKET')
-            range = self.range()
+            index = IndexNode(self.classical_expr())
             self.consume('RBRACKET')
-        return QBitNode(qreg, range)
-    
+            return QBitNode(qreg, index)
+        return QBitNode(qreg, None)
+
+    '''
     def range(self):
         if self.current_token() and self.current_token().type == 'COLON':
             self.consume('COLON')
@@ -287,13 +282,7 @@ class RQCParser:
                     up = self.classical_expr()
                 return RangeNode(low, up)
             else: return RangeNode(None, None, low)
-
-    def list_expr(self):
-        cvals = []
-        while self.current_token() and self.current_token().type != 'RBRACKET':
-            if self.current_token().type == 'COMMA': self.consume('COMMA')
-            cvals.append(self.classical_expr())
-        return ListNode(cvals)
+    '''
 
     def classical_expr(self): 
         return self.expr_plus_minus()
@@ -356,9 +345,9 @@ class RQCParser:
             operand = self.term()
             if self.current_token() and self.current_token().type == 'LBRACKET':
                 self.consume('LBRACKET')
-                range = self.range()
+                index = IndexNode(self.classical_expr())
                 self.consume('RBRACKET')
-                operand = ArrayElementNode(operand, range)
+                operand = ArrayElementNode(operand, index)
             return SingletonNode(operand)
 
     def term(self):
@@ -375,9 +364,9 @@ class RQCParser:
                 node = IDNode(id)
                 while self.current_token() and self.current_token().type == 'LBRACKET':
                     self.consume('LBRACKET')
-                    range = self.range()
+                    index = IndexNode(self.classical_expr())
                     self.consume('RBRACKET')
-                    node = ArrayElementNode(node, range)
+                    node = ArrayElementNode(node, index)
                 return node
         else:
             raise Exception('Unexpected token:', token)

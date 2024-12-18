@@ -185,18 +185,18 @@ class High2MidTransLator:
         self.emit(Push(counter_var))
 
     def visit_QifStmtNode(self, qifstmt):
-        self.emit(MidQif(qifstmt._qbits.name(), qifstmt._qbits._range._index.name()))
+        self.emit(MidQif(qifstmt._qbits.name(), qifstmt._qbits._index._index.name()))
 
         label_skip_zero_forward, label_skip_zero_backward = self.get_label_pair()
         label_skip_one_forward, label_skip_one_backward = self.get_label_pair()
-        self.emit(MidBranchNeqZ(qifstmt._qbits.name(), label_skip_zero_backward, qifstmt._qbits._range._index.name()), label_skip_zero_forward)
+        self.emit(MidBranchNeqZ(qifstmt._qbits.name(), label_skip_zero_backward, qifstmt._qbits._index._index.name()), label_skip_zero_forward)
         #self.visit(qifstmt)
-        self.emit(MidBranchControl(qifstmt._qbits.name(), label_skip_one_backward, qifstmt._qbits._range._index.name()), label_skip_one_forward)
-        self.emit(MidBranchControl(qifstmt._qbits.name(), label_skip_zero_forward, qifstmt._qbits._range._index.name()), label_skip_zero_backward)
+        self.emit(MidBranchControl(qifstmt._qbits.name(), label_skip_one_backward, qifstmt._qbits._index._index.name()), label_skip_one_forward)
+        self.emit(MidBranchControl(qifstmt._qbits.name(), label_skip_zero_forward, qifstmt._qbits._index._index.name()), label_skip_zero_backward)
         #self.visit
-        self.emit(MidBranchEqZ(qifstmt._qbits.name(), label_skip_one_forward, qifstmt._qbits._range._index.name()), label_skip_one_backward)
+        self.emit(MidBranchEqZ(qifstmt._qbits.name(), label_skip_one_forward, qifstmt._qbits._index._index.name()), label_skip_one_backward)
 
-        self.emit(MidFiq(qifstmt._qbits.name(), qifstmt._qbits._range._index.name()))
+        self.emit(MidFiq(qifstmt._qbits.name(), qifstmt._qbits._index._index.name()))
 
     def visit_CallNode(self, call):
         for param in call._params:
@@ -229,16 +229,16 @@ class High2MidTransLator:
         gate = basic_gates[unitary.name()]
         if gate['qvar'] == 1:
             qreg = unitary._qbits[0].name()
-            offset = unitary._qbits[0]._range._index
+            offset = unitary._qbits[0]._index._index
             if isinstance(offset, SingletonNode):
                 self.emit(MidUnitary(unitary.name(), qreg, offset.name()))
             else:
                 raise Exception(f'Unrecognized index for qubit register {qreg}')
         elif gate['qvar'] == 2:
             qreg1 = unitary._qbits[0].name()
-            offset1 = unitary._qbits[0]._range._index
+            offset1 = unitary._qbits[0]._index._index
             qreg2 = unitary._qbits[1].name()
-            offset2 = unitary._qbits[1]._range._index
+            offset2 = unitary._qbits[1]._index._index
             if isinstance(offset1, SingletonNode) and isinstance(offset2, SingletonNode):
                 self.emit(MidUnitaryB(unitary.name(), qreg1, offset1.name(), qreg2, offset2.name()))
             else:

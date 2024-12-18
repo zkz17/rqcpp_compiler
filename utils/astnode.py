@@ -271,31 +271,38 @@ class RangeNode(ASTNode):
     # low: CValueNode
     # up: CValueNode
     # index: CValueNode
-    def __init__(self, low, up, index=None):
+    def __init__(self, low, up):
         self._low = low
         self._up = up
+
+    def print(self, level=0, end='\n'):
+        print('[RangeNode: low = ', end='')
+        if self._low: self._low.print(0, ', ')
+        else: print('None, ', end='')
+        print('up = ', end='')
+        if self._up: self._up.print(0, ']' + end)
+        else: print('None]', end=end)
+
+class IndexNode(ASTNode):
+    # index: CValueNode
+    def __init__(self, index):
         self._index = index
 
     def print(self, level=0, end='\n'):
         if self._index:
-            print('[RangeNode: index = ', end='')
+            print('[IndexNode: ', end='')
             self._index.print(0, '')
-            print(']', end=end)
+            print(' ]', end=end)
         else:
-            print('[RangeNode: low = ', end='')
-            if self._low: self._low.print(0, ', ')
-            else: print('None, ', end='')
-            print('up = ', end='')
-            if self._up: self._up.print(0, ']' + end)
-            else: print('None]', end=end)
+            print('None', end=end)
 
 class ArrayElementNode(ASTNode):
     # id: IDNode
     # array: IDNode or ArrayElementNodeay
-    # range: RangeNode
-    def __init__(self, array, range):
+    # index: IndexNode
+    def __init__(self, array, index):
         self._array = array
-        self._range = range
+        self._index = index
         if isinstance(array, IDNode): self._id = array
         else: self._id = array._id
 
@@ -303,7 +310,7 @@ class ArrayElementNode(ASTNode):
         self.print_indent(level)
         print('[ArrayElementNode: ', end='')
         self._array.print(0, ', ')
-        self._range.print(0, '')
+        self._index.print(0, '')
         print(']', end=end)
 
     def name(self):
@@ -311,10 +318,10 @@ class ArrayElementNode(ASTNode):
 
 class QBitNode(ASTNode):
     # qreg: IDNode
-    # range: RangeNode
-    def __init__(self, qreg, range):
+    # range: IndexNode
+    def __init__(self, qreg, index):
         self._qreg = qreg
-        self._range = range
+        self._index = index
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -325,8 +332,8 @@ class QBitNode(ASTNode):
         self._qreg.print(level + 1)
 
         self.print_indent(level)
-        print('  range: ', end='')
-        self._range.print(level + 1)
+        print('  index: ', end='')
+        self._index.print(level + 1)
 
     def name(self):
         return self._qreg.name()
@@ -436,37 +443,6 @@ class CValueNode(ASTNode):
 
     def equal_to(self, node):
         return isinstance(node, CValueNode) and self.value() == node.value()
-    
-class ListNode(CValueNode):
-    # cvals: [ CValueNode ]
-    def __init__(self, cvals):
-        self._cvals = cvals
-
-    def value(self):
-        return None
-
-    def print(self, level=0, end='\n'):
-        print('[ListNode: ', end='')
-        for cval in self._cvals:
-            cval.print(0, ' ')
-        print(']', end=end)
-
-    def equal_to(self, node):
-        if isinstance(node, CValueNode):
-            if len(self._cvals) == len(node._cvals):
-                for i in len(self._cvals):
-                    if not self._cvals[i].equal_to(node._cvals[i]): return False
-                return True
-            elif len(self._cvals) == 1:
-                for cval in node._cvals:
-                    if not self._cvals[0].equal_to(cval): return False
-                return True
-            elif len(node._cvals) == 1:
-                for cval in self._cvals:
-                    if not node._cvals[0].equal_to(cval): return False
-                return True
-            else: return False
-        else: return False
     
 class UnaOpNode(CValueNode):
     # right: CValueNode
