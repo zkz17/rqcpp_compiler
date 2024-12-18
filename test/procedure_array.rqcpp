@@ -1,0 +1,17 @@
+qbits q[4]
+procedure array P[4](x, y), Q[2]()
+
+procedure P[0](x, y):
+    CNOT(q[x], q[y])
+
+procedure P[1](x, y):
+    skip
+
+procedure P[2](x, y):
+    H(q[x])
+
+procedure main():
+    P[0](1, 2)
+    P[1](0, 0)
+    P[2](3, 0)
+    P[3](0, 0)

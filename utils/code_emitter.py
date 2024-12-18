@@ -51,10 +51,10 @@ class CodeEmitter:
         else: self.available_tempvar_name.append(name)
     
     def get_procentry_label(self, proc):
-        return f'{proc.name()}.ent'
+        return f'{proc.name_in_array()}.ent'
     
     def get_procbegin_label(self, proc):
-        return f'{proc.name()}.beg'
+        return f'{proc.name_in_array()}.beg'
     
     def get_procend_label(self, proc):
-        return f'{proc.name()}.end'
+        return f'{proc.name_in_array()}.end'

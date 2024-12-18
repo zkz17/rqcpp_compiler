@@ -2,9 +2,22 @@
 class Symbol:
     # name: str
     # type: Type
-    def __init__(self, name, type):
+    # size: int
+    def __init__(self, name, type, size=1):
         self.name = name
         self.type = type
+        self.size = size
+        self.array = {} # { int: TODO }
+
+    def defined(self, index):
+        return index in self.array
+
+    def assign_element(self, index, value=0):
+        self.array[index] = value
+
+    def get_element(self, index):
+        if not self.defined(index): return None
+        return self.array[index]
 
 # Symbol Table class
 class SymbolTable:
@@ -15,8 +28,18 @@ class SymbolTable:
         self.table = {}
         self.free_var = {}
 
-    def define(self, name, type):
-        if name in self.table: raise Exception(f'Conflict definition of variable \'{name}\'')
+    def allocate(self, name, type, size):
+        self.table[name] = Symbol(name, type, size)
+
+    def define(self, name, type, index=None):
+        if name in self.table: 
+            if index: 
+                if index._value >= self.table[name].size: 
+                    raise Exception(f'Procedure array index out of range, max: {self.table[name].size - 1}, given: {index}')
+                if self.table[name].defined(index._value):
+                    raise Exception(f'Conflict definition of array element \'{name}[{index._value}]\'')
+                self.table[name].assign_element(index._value)
+            else: raise Exception(f'Conflict definition of variable \'{name}\'')
         else: self.table[name] = Symbol(name, type)
 
     def assign(self, name, type):

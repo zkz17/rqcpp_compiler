@@ -29,6 +29,7 @@ class RQCParser:
         qregs = []
         arrays = []
         procs = []
+        proc_arrays = []
         entry = None
 
         newline = self.current_token()
@@ -43,12 +44,14 @@ class RQCParser:
                 if self.current_token() and self.current_token().type == 'MAIN':
                     if entry: raise Exception('Conflict definition of procedure \'main\'')
                     entry = self.main()
+                elif self.current_token() and self.current_token().type == 'ARRAY':
+                    proc_arrays += self.proc_arrays()
                 else:
                     procs.append(self.procedure())
 
             newline = self.current_token()
 
-        return TopNode(entry, procs, qregs, arrays)
+        return TopNode(entry, procs, qregs, arrays, proc_arrays)
     
     def main(self):
         self.consume('MAIN')
@@ -108,6 +111,14 @@ class RQCParser:
         token = self.consume('ID')
         id = IDNode(str(token.value))
 
+        ## Parse index for procedure arrays (optional)
+        index = None
+        if self.current_token() and self.current_token().type == 'LBRACKET':
+            self.consume('LBRACKET')
+            index = self.term()
+            if not isinstance(index, NumNode): raise Exception(f'Index of procedure array element {id._id} must be fixed')
+            self.consume('RBRACKET')
+
         ## Parse procedure params
         params = []
         self.consume('LPAREN')
@@ -120,7 +131,37 @@ class RQCParser:
         self.consume('COLON')
         body = self.block_statement()
 
-        return ProcNode(id, params, body)
+        return ProcNode(id, params, body, index)
+    
+    def proc_arrays(self):
+        proc_arrays = []
+        self.consume('ARRAY')
+        token = self.consume('ID')
+        id = IDNode(str(token.value))
+
+        while True: # parallel definition divided by COMMA
+            self.consume('LBRACKET')
+            size = self.term()
+            if not isinstance(size, NumNode): raise Exception(f'Size of procedure array {id.name()} must be fixed')
+            self.consume('RBRACKET')
+
+            ## Parse procedure params
+            params = []
+            self.consume('LPAREN')
+            while self.current_token() and self.current_token().type != 'RPAREN':
+                if self.current_token().type == 'COMMA': self.consume()
+                params.append(IDNode(str(self.consume('ID').value)))
+            self.consume('RPAREN')
+            proc_arrays.append(ProcArrayNode(id, size, params))
+
+            token = self.current_token()
+            if self.current_token().type == 'COMMA':
+                self.consume('COMMA')
+                token = self.consume('ID')
+                id = IDNode(str(token.value))
+            else: 
+                break
+        return proc_arrays
     
     def block_statement(self):
         statements = []
@@ -362,7 +403,7 @@ class RQCParser:
                 return BasicGateNode(id)
             else:
                 node = IDNode(id)
-                while self.current_token() and self.current_token().type == 'LBRACKET':
+                if self.current_token() and self.current_token().type == 'LBRACKET':
                     self.consume('LBRACKET')
                     index = IndexNode(self.classical_expr())
                     self.consume('RBRACKET')

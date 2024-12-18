@@ -54,7 +54,7 @@ class TypeCheckAnalyzer(Analyzer):
                 raise Exception(f'Assignment of array {symbol.name} is prohibited')
 
     def visit_CallNode(self, call):
-        proc_name = call.name()
+        proc_name = call._callee.name()
         symbol = self.get_symbol(proc_name)
         if not symbol.type.is_procedure(): 
             raise Exception(f'{type(symbol.type).__name__} variable \'{proc_name}\' is not callable') 

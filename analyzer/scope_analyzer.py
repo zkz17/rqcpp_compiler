@@ -16,8 +16,10 @@ class ScopeAnalyzer(Analyzer):
         ast._symbols = self.global_scope
 
     def register_procs(self, topnode):
+        for parray in topnode._proc_arrays:
+            self.global_scope.allocate(parray.name(), ProcedureType(len(parray._params)), parray.size())
         for proc in topnode._procs:
-            self.global_scope.define(proc.name(), ProcedureType(len(proc._params)))
+            self.global_scope.define(proc.name(), ProcedureType(len(proc._params)), proc._index)
 
     def register_qregs(self, topnode):
         for qreg in topnode._qregs:
@@ -79,7 +81,7 @@ class ScopeAnalyzer(Analyzer):
             self.get_symbol(var.name())
 
     def visit_CallNode(self, call):
-        proc_name = call.name()
+        proc_name = call._callee.name()
         self.get_symbol(proc_name)
 
         for param in call._params:

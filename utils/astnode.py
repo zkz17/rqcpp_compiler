@@ -22,11 +22,13 @@ class TopNode(ASTNode):
     # procs: [ ProcNode ]
     # qregs: [ QRegNode ]
     # arrays: [ ArrayDeclNode ]
-    def __init__(self, entry, procs, qregs, arrays):
+    # proc_arrays: [ ProcArrayNode ]
+    def __init__(self, entry, procs, qregs, arrays, proc_arrays=[]):
         self._entry = entry
         self._procs = procs
         self._qregs = qregs
         self._arrays = arrays
+        self._proc_arrays = proc_arrays
         self._symbols = SymbolTable()
 
     def print(self, level=0, end='\n'):
@@ -44,6 +46,12 @@ class TopNode(ASTNode):
         print('  arrays: ')
         for array in self._arrays:
             array.print(level + 1)
+
+        ## print registered procedure arrays
+        self.print_indent(level)
+        print('  procedure arrays: ')
+        for parray in self._proc_arrays:
+            parray.print(level + 1)
         
         ## print entry point
         self.print_indent(level)
@@ -58,12 +66,14 @@ class TopNode(ASTNode):
 
 class ProcNode(ASTNode):
     # id: IDNode
+    # index : NumNode or None
     # params: [ IDNode ]
     # body: BlockNode
-    def __init__(self, id, params, body):
+    def __init__(self, id, params, body, index=None):
         self._id = id
         self._params = params
         self._body = body
+        self._index = index
 
     def print(self, level=0, end='\n'):
         self.print_indent(level)
@@ -72,6 +82,10 @@ class ProcNode(ASTNode):
         self.print_indent(level)
         print('  ID: ', end='')
         self._id.print(level + 1)
+        
+        if self._index:
+            self.print_indent(level)
+            print('  index: ', self._index._value)
 
         self.print_indent(level)
         print('  params: ', end='')
@@ -82,6 +96,10 @@ class ProcNode(ASTNode):
         self.print_indent(level)
         print('  body: ', end='')
         self._body.print(level + 1)
+
+    def name_in_array(self):
+        if self._index: return f'{self.name()}[{self._index._value}]'
+        return self.name()
 
     def name(self):
         return self._id.name()
@@ -221,10 +239,10 @@ class AssignNode(ASTNode):
         self._right.print(0, end=end)
 
 class CallNode(ASTNode):
-    # id: IDNode
+    # callee: IDNode or ArrayElementNode
     # params: [ CValueNode ]
-    def __init__(self, id, params):
-        self._id = id
+    def __init__(self, callee, params):
+        self._callee = callee
         self._params = params
 
     def print(self, level=0, end='\n'):
@@ -233,7 +251,7 @@ class CallNode(ASTNode):
 
         self.print_indent(level)
         print('  callee: ', end='')
-        self._id.print(0)
+        self._callee.print(0)
 
         self.print_indent(level)
         print('  params: ', end='')
@@ -241,8 +259,11 @@ class CallNode(ASTNode):
             param.print(0, ' ')
         print()
 
+    def name_in_array(self):
+        return self._callee.name_in_array()
+
     def name(self):
-        return self._id.name()
+        return self._callee.name()
 
 class UnitaryNode(ASTNode):
     # gate: BasicGateNode
@@ -296,6 +317,9 @@ class IndexNode(ASTNode):
         else:
             print('None', end=end)
 
+    def name(self):
+        return self._index.name()
+
 class ArrayElementNode(ASTNode):
     # id: IDNode
     # array: IDNode or ArrayElementNodeay
@@ -312,6 +336,9 @@ class ArrayElementNode(ASTNode):
         self._array.print(0, ', ')
         self._index.print(0, '')
         print(']', end=end)
+
+    def name_in_array(self):
+        return f'{self.name()}[{self._index.name()}]'
 
     def name(self):
         return self._id.name()
@@ -360,6 +387,55 @@ class QRegNode(ASTNode):
     def name(self):
         return self._id.name()
 
+class NumNode(ASTNode):
+    # value: int
+    def __init__(self, value):
+        self._value = value
+
+    def print(self, level=0, end='\n'):
+        print('[NumNode: ' + str(self._value) + ']', end=end)
+
+    def equal_to(self, node):
+        return isinstance(node, NumNode) and self._value == node._value
+
+class IDNode(ASTNode):
+    # id: str
+    def __init__(self, id):
+        self._id = id
+
+    def print(self, level=0, end='\n'):
+        print('[IDNode: ' + str(self._id) + ']', end=end)
+
+    def equal_to(self, node):
+        return isinstance(node, IDNode) and self._id == node._id
+
+    def name_in_array(self):
+        return self._id
+    
+    def name(self):
+        return self._id
+    
+class BasicGateNode(IDNode):
+    # id: str
+    def __init__(self, id):
+        self._id = id
+
+    def print(self, level=0, end='\n'):
+        print('[BasicGateNode: ' + str(self._id) + ']', end=end)
+
+    def equal_to(self, node):
+        return isinstance(node, BasicGateNode) and self._id == node._id
+    
+    def name(self):
+        return self._id
+        
+class UndefinedNode(ASTNode):
+    def __init__(self):
+        pass
+    
+    def print(self, level=0, end='\n'):
+        print('[UndefinedNode]', end=end)
+
 class ArrayDeclNode(ASTNode):
     # id: IDNode
     # dimensions: [ CValueNode ]
@@ -383,52 +459,39 @@ class ArrayDeclNode(ASTNode):
 
     def name(self):
         return self._id.name()
-
-class NumNode(ASTNode):
-    # value: int
-    def __init__(self, value):
-        self._value = value
-
-    def print(self, level=0, end='\n'):
-        print('[NumNode: ' + str(self._value) + ']', end=end)
-
-    def equal_to(self, node):
-        return isinstance(node, NumNode) and self._value == node._value
-
-class IDNode(ASTNode):
-    # id: str
-    def __init__(self, id):
+    
+class ProcArrayNode(ASTNode):
+    # id: IDNode
+    # size : NumNode
+    # params: [ IDNode ]
+    def __init__(self, id, size, params):
         self._id = id
+        self._size = size
+        self._params = params
 
     def print(self, level=0, end='\n'):
-        print('[IDNode: ' + str(self._id) + ']', end=end)
+        self.print_indent(level)
+        print('ProcArrayNode')
 
-    def equal_to(self, node):
-        return isinstance(node, IDNode) and self._id == node._id
-    
+        self.print_indent(level)
+        print('  ID: ', end='')
+        self._id.print(level + 1)
+
+        self.print_indent(level)
+        print('  size: ', end='')
+        self._size.print(0)
+
+        self.print_indent(level)
+        print('  params: ', end='')
+        for param in self._params:
+            param.print(0, ' ')
+        print()
+
+    def size(self):
+        return self._size._value
+
     def name(self):
-        return self._id
-        
-class UndefinedNode(ASTNode):
-    def __init__(self):
-        pass
-    
-    def print(self, level=0, end='\n'):
-        print('[UndefinedNode]', end=end)
-    
-class BasicGateNode(IDNode):
-    # id: str
-    def __init__(self, id):
-        self._id = id
-
-    def print(self, level=0, end='\n'):
-        print('[BasicGateNode: ' + str(self._id) + ']', end=end)
-
-    def equal_to(self, node):
-        return isinstance(node, BasicGateNode) and self._id == node._id
-    
-    def name(self):
-        return self._id
+        return self._id.name()
 
 class CValueNode(ASTNode):
     # abstract node of classical value
