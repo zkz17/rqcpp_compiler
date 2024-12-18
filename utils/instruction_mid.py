@@ -28,20 +28,6 @@ class MidIns(Instruction):
     def is_mid_level(self):
         return True
     
-class MidStart(MidIns):
-    def __init__(self):
-        self.opcode = 16
-
-    def to_string(self):
-        return 'start'
-    
-class MidFinish(MidIns):
-    def __init__(self):
-        self.opcode = 17
-
-    def to_string(self):
-        return 'finish'
-    
 class Push(MidIns):
     def __init__(self, var):
         self.var = var

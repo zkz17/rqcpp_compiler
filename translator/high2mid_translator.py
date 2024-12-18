@@ -1,6 +1,6 @@
 from utils.astnode import *
 from utils.instruction_mid import *
-from utils.instruction_low import SwapBr, Negation
+from utils.instruction_low import SwapBr, Negation, Start, Finish
 from utils.code_emitter import CodeEmitter
 from basic_gates import basic_gates
 
@@ -110,11 +110,11 @@ class High2MidTransLator:
         else: raise Exception(f'Unhandled classical assignment of type {type(assign._right).__name__} for variable {assign._left.name()}')
 
     def visit_TopNode(self, topnode):
-        self.emit(MidStart())
+        self.emit(Start())
         ## optional: push inputs to procedure main
         self.emit(MidBranch(self.emitter.get_procbegin_label(topnode._entry)))
         ## optional: pop inputs to procedure main
-        self.emit(MidFinish())
+        self.emit(Finish())
 
         self.visit(topnode._entry)
         for proc in topnode._procs:

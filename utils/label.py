@@ -11,4 +11,4 @@ class Label:
         self.line = line
 
     def to_string(self):
-        return self.label + self.index + self.suffix
+        return self.label + ('' if self.index == '' else f'[{self.index}]') + self.suffix
