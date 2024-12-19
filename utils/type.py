@@ -74,6 +74,9 @@ class ArrayType(Type):
         self.element_type = element_type
         self.length = length
 
+    def is_classical(self):
+        return self.element_type.is_classical()
+
     def is_array(self):
         return True
     

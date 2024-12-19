@@ -72,11 +72,16 @@ def main():
 
     ## Code Generation.
     generator = RQCGenerator()
-    code = generator.generate(ast)
+    code, mid, mem = generator.generate(ast)
     if DEBUG:
-        print(' ****** ****** QINS Code ****** ******')
-        code.print()
+        print(' ****** ****** Mid-Level Code ****** ******')
+        mid.print()
         print()
+        print(' ****** ****** Memory Allocation ****** ******')
+        mem.print()
+        print()
+        print(' ****** ****** Low-Level Code ****** ******')
+        code.print()
 
 if __name__ == "__main__": 
     main()

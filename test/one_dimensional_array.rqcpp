@@ -1,5 +1,5 @@
 qbits q[3]
-array x[3]
+array x[3], a[4]
 
 procedure P():
     y = 1

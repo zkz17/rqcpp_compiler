@@ -23,14 +23,14 @@ class ScopeAnalyzer(Analyzer):
 
     def register_qregs(self, topnode):
         for qreg in topnode._qregs:
-            self.global_scope.define(qreg.name(), QuantumType())
+            self.global_scope.allocate(qreg.name(), QuantumType(), qreg._length.value())
 
     def register_arrays(self, topnode):
         for array in topnode._arrays:
             etype = ClassicalType()
             for dimension in array._dimensions:
                 etype = ArrayType(etype, dimension.value())
-            self.global_scope.define(array.name(), etype)
+            self.global_scope.allocate(array.name(), etype, etype.length)
 
     def visit_BlockNode(self, block):
         for stmt in block._statements:

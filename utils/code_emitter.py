@@ -3,17 +3,19 @@ from utils.label import Label
 class CodeList:
     def __init__(self):
         self.list = []
-        self.line_counter = 1
+
+    def code(self):
+        return self.list
 
     def insert(self, inst, label=None):
-        self.list.append((self.line_counter, label, inst))
-        if label: label.set_line(self.line_counter)
-        self.line_counter += 1
+        self.list.append((label, inst))
     
     def print(self):
+        line_counter = 0
         print(f'{'line':5}{'label':10}instruction')
-        for line, label, inst in self.list:
-            print(f'{line:<5}{(label.to_string() if label else ''):<10}{inst.to_string()}')
+        for label, inst in self.list:
+            line_counter += 1
+            print(f'{line_counter:<5}{(label.to_string() if label else ''):<10}{inst.to_string()}')
 
 # Code Emitter class
 class CodeEmitter:

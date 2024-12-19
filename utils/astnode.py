@@ -17,6 +17,9 @@ class ASTNode:
     def name(self):
         return ''
     
+    def index(self):
+        return None
+    
 class TopNode(ASTNode):
     # entry: ProcNode
     # procs: [ ProcNode ]
@@ -330,6 +333,9 @@ class ArrayElementNode(ASTNode):
         self._index.print(0, '')
         print(']', end=end)
 
+    def index(self):
+        return self._index.name()
+
     def name(self):
         return self._id.name()
 
@@ -619,11 +625,18 @@ class SingletonNode(CValueNode):
         else:
             raise Exception('Empty oprand')
         
+    def index(self):
+        if isinstance(self._value, ArrayElementNode):
+            return self._value.index()
+        return None
+        
     def name(self):
         if isinstance(self._value, IDNode):
             return self._value.name()
         elif isinstance(self._value, NumNode):
             return str(self._value._value)
+        elif isinstance(self._value, ArrayElementNode):
+            return self._value.name()
         return ''
         
 class ProcParamNode(CValueNode):
