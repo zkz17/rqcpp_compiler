@@ -1,5 +1,5 @@
 from utils.code_emitter import CodeEmitter
-from utils.register import RegisterHandler
+from utils.register import RegisterHandler, Register
 from utils.instruction_low import *
 
 # Mid-Level to Low-Level Translation class
@@ -20,6 +20,46 @@ class Mid2LowTransLator:
     
     def generic_translate(self, inst, label):
         self.emit(UnhandledIns(f'Unhandled instruction type {type(inst).__name__}'), label)
+
+    def translate_Pop(self, pop, label):
+        if isinstance(pop.var, Register):
+            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(LoadR(pop.var, self.reg_handler.sp))
+        elif pop.var.is_number:
+            r = self.get_reg()
+            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(LoadR(r, self.reg_handler.sp))
+            self.unload_imm(int(pop.var.name), r)
+        else:
+            r, regs = self.load_var(pop.var)
+            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(LoadR(r, self.reg_handler.sp))
+            self.unload_var(pop.var, r, regs)
+
+    def translate_Push(self, push, label):
+        if isinstance(push.var, Register):
+            self.emit(LoadR(push.var, self.reg_handler.sp))
+            self.emit(AddI(self.reg_handler.sp, 1))
+        elif push.var.is_number:
+            r = self.load_imm(int(push.var.name))
+            self.emit(LoadR(r, self.reg_handler.sp))
+            self.emit(AddI(self.reg_handler.sp, 1))
+            self.clear_reg(r)
+        else:
+            r, regs = self.load_var(push.var)
+            self.emit(LoadR(r, self.reg_handler.sp))
+            self.emit(AddI(self.reg_handler.sp, 1))
+            self.unload_var(push.var, r, regs)
+
+    def translate_MidQif(self, qif, label):
+        r, regs = self.load_var(qif.reg)
+        self.emit(Qif(r))
+        self.unload_var(qif.reg, r, regs)
+
+    def translate_MidFiq(self, fiq, label):
+        r, regs = self.load_var(fiq.reg)
+        self.emit(Fiq(r))
+        self.unload_var(fiq.reg, r, regs)
 
     def translate_MidBranchEqZ(self, bez, label):
         r, regs = self.load_var(bez.var)

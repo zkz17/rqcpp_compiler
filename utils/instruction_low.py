@@ -164,11 +164,17 @@ class Qif(Rins):
     def __init__(self, r1):
         self.opcode = 14
         self.r1 = r1
+
+    def to_string(self):
+        return f'qif({self.r1.to_string()})'
     
 class Fiq(Rins):
     def __init__(self, r1):
         self.opcode = 15
         self.r1 = r1
+
+    def to_string(self):
+        return f'fiq({self.r1.to_string()})'
     
 class Start(Rins):
     def __init__(self):

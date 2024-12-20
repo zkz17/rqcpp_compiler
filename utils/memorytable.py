@@ -15,7 +15,7 @@ class MemoryTable:
         self.ccounter = 0
         self.qtable = {}
         self.qcounter = 0
-        self.cword_length = 8
+        self.cword_length = 1
 
     def offset(self, varname):
         if varname in self.ctable:
