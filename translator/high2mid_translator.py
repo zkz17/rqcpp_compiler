@@ -262,7 +262,8 @@ class High2MidTransLator:
         try:
             return Immediate(int(name))
         except:
-            return Variable(name, index)
+            if not name: return None
+            return Variable(name, self.get_var(index))
         
     def emit(self, inst, label=None):
         self.emitter.emit(inst, label)

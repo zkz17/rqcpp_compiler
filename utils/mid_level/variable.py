@@ -2,8 +2,7 @@
 class Variable:
     def __init__(self, name, index=None):
         self.name = name
-        if index: self.index = Variable(index)
-        else: self.index = index
+        self.index = index
 
     def is_immediate(self):
         return False

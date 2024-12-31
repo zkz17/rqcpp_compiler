@@ -1,4 +1,4 @@
-# Register classes
+# Register base class
 class Register:
     def __init__(self):
         pass
@@ -10,8 +10,9 @@ class Register:
         return False
     
     def to_string(self):
-        return ''
-    
+        return 'undefined register type'
+
+# Register classes
 class SystemReg(Register):
     def __init__(self, name):
         self.name = name
@@ -32,6 +33,7 @@ class UserReg(Register):
     def to_string(self):
         return f'r{self.index}'
     
+# Register Handler class
 class RegisterHandler:
     def __init__(self):
         self.init_system_regs()
