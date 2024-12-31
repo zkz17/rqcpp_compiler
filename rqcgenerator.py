@@ -1,5 +1,5 @@
 from utils.memorytable import MemoryTable
-from utils.instruction_mid import MidVariable
+from utils.mid_level.instruction import Variable
 
 # Code Generator class
 class RQCGenerator:
@@ -33,6 +33,6 @@ class RQCGenerator:
         mem_table.alloc_arrays(ast._symbols)
         for _, inst in mid_code.code():
             for child in inst.__dict__.values():
-                if isinstance(child, MidVariable) and not child.is_number:
+                if isinstance(child, Variable) and not child.is_immediate():
                     mem_table.allocate(child.name)
         return mem_table

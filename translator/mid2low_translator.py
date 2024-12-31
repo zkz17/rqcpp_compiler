@@ -1,6 +1,7 @@
 from utils.code_emitter import CodeEmitter
 from utils.register import RegisterHandler, Register
-from utils.instruction_low import *
+from utils.instruction import *
+from utils.mid_level.variable import Immediate
 
 # Mid-Level to Low-Level Translation class
 class Mid2LowTransLator:
@@ -23,32 +24,32 @@ class Mid2LowTransLator:
 
     def translate_Pop(self, pop, label):
         if isinstance(pop.var, Register):
-            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(SubI(self.reg_handler.sp, Immediate(1)))
             self.emit(LoadR(pop.var, self.reg_handler.sp))
-        elif pop.var.is_number:
+        elif pop.var.is_immediate():
             r = self.get_reg()
-            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(SubI(self.reg_handler.sp, Immediate(1)))
             self.emit(LoadR(r, self.reg_handler.sp))
-            self.unload_imm(int(pop.var.name), r)
+            self.unload_imm(pop.var, r)
         else:
             r, regs = self.load_var(pop.var)
-            self.emit(SubI(self.reg_handler.sp, 1))
+            self.emit(SubI(self.reg_handler.sp, Immediate(1)))
             self.emit(LoadR(r, self.reg_handler.sp))
             self.unload_var(pop.var, r, regs)
 
     def translate_Push(self, push, label):
         if isinstance(push.var, Register):
             self.emit(LoadR(push.var, self.reg_handler.sp))
-            self.emit(AddI(self.reg_handler.sp, 1))
-        elif push.var.is_number:
-            r = self.load_imm(int(push.var.name))
+            self.emit(AddI(self.reg_handler.sp, Immediate(1)))
+        elif push.var.is_immediate():
+            r = self.load_imm(push.var)
             self.emit(LoadR(r, self.reg_handler.sp))
-            self.emit(AddI(self.reg_handler.sp, 1))
+            self.emit(AddI(self.reg_handler.sp, Immediate(1)))
             self.clear_reg(r)
         else:
             r, regs = self.load_var(push.var)
             self.emit(LoadR(r, self.reg_handler.sp))
-            self.emit(AddI(self.reg_handler.sp, 1))
+            self.emit(AddI(self.reg_handler.sp, Immediate(1)))
             self.unload_var(push.var, r, regs)
 
     def translate_MidQif(self, qif, label):
@@ -60,6 +61,22 @@ class Mid2LowTransLator:
         r, regs = self.load_var(fiq.reg)
         self.emit(Fiq(r))
         self.unload_var(fiq.reg, r, regs)
+
+    def translate_MidBranch(self, bra, label):
+        if bra.label.suffix == '.ent':
+            if bra.label.index:
+                self.emit(UnhandledIns(f'Unhandled instruction {bra.to_string()}'), label)
+            else:
+                r1 = self.load_imm(bra.label)
+                self.emit(Sub(r1, self.reg_handler.pc))
+                self.emit(SubI(r1, Immediate(2)))
+                self.emit(SwapBr(r1))
+                self.emit(AddI(r1, Immediate(2)))
+                self.emit(Sub(r1, self.reg_handler.pc))
+                self.emit(Negation(r1))
+                self.unload_imm(bra.label, r1)
+        else:
+            self.emit(Branch(bra.label), label)
 
     def translate_MidBranchEqZ(self, bez, label):
         r, regs = self.load_var(bez.var)
@@ -101,9 +118,9 @@ class Mid2LowTransLator:
 
     def translate_MidXor(self, xor, label):
         r1, regs1 = self.load_var(xor.var1)
-        r2 = self.load_imm(self.mem_table.offset(xor.var2.name))
+        r2 = self.load_imm(Immediate(self.mem_table.offset(xor.var2.name)))
         self.emit(FetchR(r1, r2), label)
-        self.unload_imm(self.mem_table.offset(xor.var2.name), r2)
+        self.unload_imm(Immediate(self.mem_table.offset(xor.var2.name)), r2)
         self.unload_var(xor.var1, r1, regs1)
 
     def translate_MidAdd(self, add, label):
@@ -148,9 +165,9 @@ class Mid2LowTransLator:
         self.unload_var(unib.qreg1, r1, regs1)
 
     def unload_var(self, var, r, regs):
-        if var.is_number:
+        if var.is_immediate():
             ## Unload value
-            self.unload_imm(int(var.name), r)
+            self.unload_imm(var, r)
         elif var.index:
             ## Unload value into address
             r2 = regs.pop()
@@ -160,7 +177,7 @@ class Mid2LowTransLator:
             ## Unload address
             r1 = regs.pop()
             self.emit(Sub(r2, r1))
-            self.emit(Load(r2, self.mem_table.offset(var.name)))
+            self.emit(Load(r2, Immediate(self.mem_table.offset(var.name))))
             self.clear_reg(r2)
 
             ## Unload index value
@@ -172,14 +189,14 @@ class Mid2LowTransLator:
             self.clear_reg(r)
 
             ## Unload address
-            self.emit(Load(r1, self.mem_table.offset(var.name)))
+            self.emit(Load(r1, Immediate(self.mem_table.offset(var.name))))
             self.clear_reg(r1)
 
     def load_var(self, var):
         regs = []
-        if var.is_number:
+        if var.is_immediate():
             ## Load value
-            r1 = self.load_imm(int(var.name))
+            r1 = self.load_imm(var)
             return r1, regs
         elif var.index:
             ## Load index value
@@ -188,7 +205,7 @@ class Mid2LowTransLator:
 
             ## Load address
             r2 = self.get_reg()
-            self.emit(Load(r2, self.mem_table.offset(var.name)))
+            self.emit(Load(r2, Immediate(self.mem_table.offset(var.name))))
             self.emit(Add(r2, r1))
 
             ## Load value from address
@@ -201,7 +218,7 @@ class Mid2LowTransLator:
         else:
             ## Load address
             r1 = self.get_reg()
-            self.emit(Load(r1, self.mem_table.offset(var.name)))
+            self.emit(Load(r1, Immediate(self.mem_table.offset(var.name))))
 
             ## Load value from address
             r2 = self.get_reg()

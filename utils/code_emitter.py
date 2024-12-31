@@ -1,4 +1,4 @@
-from utils.label import Label
+from utils.mid_level.label import Label
 
 class CodeList:
     def __init__(self):

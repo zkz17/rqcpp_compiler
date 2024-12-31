@@ -1,39 +1,5 @@
-
-
-# QINS Instruction base class
-class Instruction:
-    def __init__(self):
-        pass
-
-    def is_immediate_type(self):
-        return False
-    
-    def is_register_type(self):
-        return False
-    
-    def is_other_type(self):
-        return False
-    
-    def is_mid_level(self):
-        return False
-    
-    def to_string(self):
-        return f'Unhandled output type {type(self).__name__}'
-    
-# Mid-Level Variable class
-class MidVariable:
-    def __init__(self, name, index=None):
-        self.name = name
-        if index: self.index = MidVariable(index)
-        else: self.index = index
-        self.is_number = True
-        try:
-            int(self.name)
-        except:
-            self.is_number = False
-
-    def to_string(self):
-        return self.name + ('[' + self.index.to_string() + ']' if self.index else '')
+from utils.instruction import Instruction
+from utils.mid_level.variable import Variable, Immediate
 
 # Mid-Level Instruction classes
 class MidIns(Instruction):
@@ -145,7 +111,7 @@ class MidAddi(MidIns):
         self.imm = imm
 
     def to_string(self):
-        return f'addi({self.var.to_string()}, {self.imm})'
+        return f'addi({self.var.to_string()}, {self.imm.to_string()})'
     
 class MidSubi(MidIns):
     def __init__(self, var, imm):
@@ -153,7 +119,7 @@ class MidSubi(MidIns):
         self.imm = imm
 
     def to_string(self):
-        return f'sub({self.var.to_string()}, {self.imm})'
+        return f'sub({self.var.to_string()}, {self.imm.to_string()})'
     
 class MidXori(MidIns):
     def __init__(self, var, imm):
@@ -161,7 +127,7 @@ class MidXori(MidIns):
         self.imm = imm
 
     def to_string(self):
-        return f'xori({self.var.to_string()}, {self.imm})'
+        return f'xori({self.var.to_string()}, {self.imm.to_string()})'
     
 class MidQif(MidIns):
     def __init__(self, reg):
@@ -194,4 +160,4 @@ class MidArithmeticB(MidIns):
         self.var3 = var3
 
     def to_string(self):
-        return f'ari({self.op}, {self.var1.to_string()}, {self.var2.to_string()}, {self.var3.to_string()})'
+        return f'arib({self.op}, {self.var1.to_string()}, {self.var2.to_string()}, {self.var3.to_string()})'
