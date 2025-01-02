@@ -17,7 +17,8 @@ class ScopeAnalyzer(Analyzer):
 
     def register_procs(self, topnode):
         for parray in topnode._proc_arrays:
-            self.global_scope.allocate(parray.name(), ProcedureType(len(parray._params)), parray.size())
+            base_type = ProcedureType(len(parray._params))
+            self.global_scope.allocate(parray.name(), ArrayType(base_type, parray.size()), parray.size())
         for proc in topnode._procs:
             self.global_scope.define(proc.name(), ProcedureType(len(proc._params)), proc._index)
 

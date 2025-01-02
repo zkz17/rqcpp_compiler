@@ -37,7 +37,7 @@ class MemoryTable:
         for name, symbol in symboltable.table.items():
             if symbol.type.is_quantum():
                 self.qallocate(name, symbol.size)
-            elif symbol.type.is_array() and symbol.type.is_classical():
+            elif symbol.type.is_array():
                 self.allocate(name, symbol.size)
 
     def print(self):

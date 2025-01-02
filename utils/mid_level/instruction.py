@@ -1,5 +1,4 @@
 from utils.instruction import Instruction
-from utils.mid_level.variable import Variable, Immediate
 
 # Mid-Level Instruction classes
 class MidIns(Instruction):

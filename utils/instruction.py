@@ -15,12 +15,18 @@ class Instruction:
     def is_mid_level(self):
         return False
     
+    def is_unhandled(self):
+        return False
+    
     def to_string(self):
         return f'Unhandled output type {type(self).__name__}'
 
 class UnhandledIns(Instruction):
     def __init__(self, name):
         self.name = name
+    
+    def is_unhandled(self):
+        return True
 
     def to_string(self):
         return self.name

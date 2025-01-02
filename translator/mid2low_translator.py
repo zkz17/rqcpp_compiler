@@ -12,6 +12,7 @@ class Mid2LowTransLator:
 
     def translate(self, code):
         for label, inst in code.code():
+            self.emit(UnhandledIns(inst.to_string()))
             if inst.is_mid_level():
                 method_name = f"translate_{type(inst).__name__}"
                 method = getattr(self, method_name, self.generic_translate)
@@ -65,7 +66,22 @@ class Mid2LowTransLator:
     def translate_MidBranch(self, bra, label):
         if bra.label.suffix == '.ent':
             if bra.label.index:
-                self.emit(UnhandledIns(f'Unhandled instruction {bra.to_string()}'), label)
+                r1, regs1 = self.load_var(bra.label)
+                r2 = self.get_reg()
+                self.emit(Add(r2, r1))
+                self.unload_var(bra.label, r1, regs1)
+
+                self.emit(Sub(r2, self.reg_handler.pc))
+                self.emit(SubI(r2, Immediate(2)))
+                self.emit(SwapBr(r2))
+                self.emit(AddI(r2, Immediate(2)))
+                self.emit(Add(r2, self.reg_handler.pc))
+
+                self.emit(Negation(r2))
+                r1, regs1 = self.load_var(bra.label)
+                self.emit(Sub(r2, r1))
+                self.clear_reg(r2)
+                self.unload_var(bra.label, r1, regs1)
             else:
                 r1 = self.load_imm(bra.label)
                 self.emit(Sub(r1, self.reg_handler.pc))

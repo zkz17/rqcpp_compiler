@@ -3,16 +3,16 @@ class Symbol:
     # name: str
     # type: Type
     # size: int
-    def __init__(self, name, type, size=1):
+    def __init__(self, name, type, size=0):
         self.name = name
         self.type = type
         self.size = size
-        self.array = {} # { int: TODO }
+        self.array = {} # { int: Symbol }
 
     def defined(self, index):
         return index in self.array
 
-    def assign_element(self, index, value=0):
+    def assign_element(self, index, value):
         self.array[index] = value
 
     def get_element(self, index):
@@ -38,7 +38,7 @@ class SymbolTable:
                     raise Exception(f'Procedure array index out of range, max: {self.table[name].size - 1}, given: {index}')
                 if self.table[name].defined(index._value):
                     raise Exception(f'Conflict definition of array element \'{name}[{index._value}]\'')
-                self.table[name].assign_element(index._value)
+                self.table[name].assign_element(index._value, Symbol(name, type))
             else: raise Exception(f'Conflict definition of variable \'{name}\'')
         else: self.table[name] = Symbol(name, type)
 
@@ -71,7 +71,7 @@ class SymbolTable:
             if not symbol.type.is_array(): print(f'{name}: {type(symbol.type).__name__}')
             else:
                 vartype = symbol.type
-                print(f'{name}: {type(symbol.type).__name__}', end='')
+                print(f'{name}: {type(vartype.element_type).__name__} Array', end='')
                 dims = ''
                 while vartype.is_array():
                     dims = f'[{vartype.length}]' + dims

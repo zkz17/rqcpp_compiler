@@ -46,6 +46,9 @@ class ProcedureType(Type):
     def is_procedure(self):
         return True
     
+    def param_number(self):
+        return self.num_param
+    
     def equal_to(self, type):
         return isinstance(type, ProcedureType)
     
@@ -55,6 +58,9 @@ class ClassicalType(Type):
 
     def is_classical(self):
         return True
+    
+    def param_number(self):
+        return 0
     
     def equal_to(self, type):
         return isinstance(type, ClassicalType)
@@ -73,9 +79,15 @@ class ArrayType(Type):
     def __init__(self, element_type, length=0):
         self.element_type = element_type
         self.length = length
+    
+    def param_number(self):
+        return self.element_type.param_number()
 
     def is_classical(self):
         return self.element_type.is_classical()
+
+    def is_procedure(self):
+        return self.element_type.is_procedure()
 
     def is_array(self):
         return True

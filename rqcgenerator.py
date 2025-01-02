@@ -1,5 +1,5 @@
 from utils.memorytable import MemoryTable
-from utils.mid_level.instruction import Variable
+from utils.mid_level.variable import Variable
 
 # Code Generator class
 class RQCGenerator:

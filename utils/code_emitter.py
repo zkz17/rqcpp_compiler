@@ -1,4 +1,5 @@
 from utils.mid_level.label import Label
+from utils.mid_level.variable import Variable
 
 class CodeList:
     def __init__(self):
@@ -14,8 +15,11 @@ class CodeList:
         line_counter = 0
         print(f'{'line':5}{'label':10}instruction')
         for label, inst in self.list:
-            line_counter += 1
-            print(f'{line_counter:<5}{(label.to_string() if label else ''):<10}{inst.to_string()}')
+            if inst.is_unhandled():
+                print(f'**   {(label.to_string() if label else ''):<10}{inst.to_string()}')
+            else:
+                line_counter += 1
+                print(f'{line_counter:<5}{(label.to_string() if label else ''):<10}{inst.to_string()}')
 
 # Code Emitter class
 class CodeEmitter:
@@ -49,10 +53,10 @@ class CodeEmitter:
         else: self.available_tempvar_name.append(name)
     
     def get_procentry_label(self, proc):
-        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.ent')
+        return Label(proc.name(), index=Variable.get_var(proc._index.name()) if proc._index else None, suffix='.ent')
     
     def get_procbegin_label(self, proc):
-        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.beg')
+        return Label(proc.name(), index=Variable.get_var(proc._index.name()) if proc._index else None, suffix='.beg')
     
     def get_procend_label(self, proc):
-        return Label(proc.name(), index=(proc._index.name() if proc._index else ''), suffix='.end')
+        return Label(proc.name(), index=Variable.get_var(proc._index.name()) if proc._index else None, suffix='.end')

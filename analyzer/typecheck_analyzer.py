@@ -58,8 +58,8 @@ class TypeCheckAnalyzer(Analyzer):
         symbol = self.get_symbol(proc_name)
         if not symbol.type.is_procedure(): 
             raise Exception(f'{type(symbol.type).__name__} variable \'{proc_name}\' is not callable') 
-        if len(call._params) != symbol.type.num_param: 
-            raise Exception(f'Unmatched number of params for procedure call \'{proc_name}\', required: {symbol.type.num_param}, given: {len(call._params)}')
+        if len(call._params) != symbol.type.param_number(): 
+            raise Exception(f'Unmatched number of params for procedure call \'{proc_name}\', required: {symbol.type.param_number()}, given: {len(call._params)}')
 
         for param in call._params:
             self.visit(param)
