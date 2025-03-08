@@ -18,6 +18,15 @@ class Instruction:
     def is_unhandled(self):
         return False
     
+    def is_branch(self):
+        return False
+    
+    def is_conditional_branch(self):
+        return False
+    
+    def is_head(self):
+        return False
+    
     def to_string(self):
         return f'Unhandled output type {type(self).__name__}'
 

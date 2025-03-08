@@ -23,35 +23,75 @@ class Pop(MidIns):
         return f'pop({self.var.to_string()})'
 
 class MidBranchEqZ(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, ishead=False):
         self.var = var
         self.label = label
+        self.ishead = ishead
 
     def to_string(self):
         return f'bez({self.var.to_string()}, {self.label.to_string()})'
+    
+    def is_branch(self):
+        return True
+    
+    def is_conditional_branch(self):
+        return True
+    
+    def is_head(self):
+        return self.ishead
 
 class MidBranchNeqZ(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, ishead=False):
         self.var = var
         self.label = label
+        self.ishead = ishead
 
     def to_string(self):
         return f'bnz({self.var.to_string()}, {self.label.to_string()})'
+    
+    def is_branch(self):
+        return True
+    
+    def is_conditional_branch(self):
+        return True
+    
+    def is_head(self):
+        return self.ishead
 
 class MidBranch(MidIns):
-    def __init__(self, label):
+    def __init__(self, label, ishead=False):
         self.label = label
+        self.ishead = ishead
 
     def to_string(self):
         return f'bra({self.label.to_string()})'
     
+    def is_branch(self):
+        return True
+    
+    def is_conditional_branch(self):
+        return False
+    
+    def is_head(self):
+        return self.ishead
+    
 class MidBranchControl(MidIns):
-    def __init__(self, var, label):
+    def __init__(self, var, label, ishead=False):
         self.var = var
         self.label = label
+        self.ishead = ishead
 
     def to_string(self):
         return f'brc({self.var.to_string()}, {self.label.to_string()})'
+    
+    def is_branch(self):
+        return True
+    
+    def is_conditional_branch(self):
+        return False
+    
+    def is_head(self):
+        return self.ishead
     
 class MidUnitary(MidIns):
     def __init__(self, gate, qreg):

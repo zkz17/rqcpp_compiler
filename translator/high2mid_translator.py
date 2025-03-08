@@ -64,12 +64,12 @@ class High2MidTransLator:
             if cond:
                 self.visit(pre)
                 label_cond_forward, label_cond_backward = self.get_label_pair()
-                self.emit(MidBranchEqZ(Variable.get_var(cond.name(), cond.index()), label_cond_backward), label_cond_forward)
+                self.emit(MidBranchEqZ(Variable.get_var(cond.name(), cond.index()), label_cond_backward, True), label_cond_forward)
 
                 self.uncomp(body)
 
                 label_skip_forward, label_skip_backward = self.get_label_pair()
-                self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_backward), label_skip_forward)
+                self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_backward, True), label_skip_forward)
                 branch_back.append((MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_forward), label_skip_backward, pre))
 
                 self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_cond_forward), label_cond_backward)
@@ -88,10 +88,13 @@ class High2MidTransLator:
         label_cond_forward, label_cond_backward = self.get_label_pair()
         self.emit(MidBranchNeqZ(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_backward), label_cond_forward)
 
+        self.uncomp(whilestmt._pre)
+        self.emit(MidBranchEqZ(counter_var, label_counter_backward, True), label_counter_forward)
+        
         self.uncomp(whilestmt._body)
         self.emit(MidSubi(counter_var, Variable.get_var(1)))
 
-        self.emit(MidBranchControl(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_forward), label_cond_backward)
+        self.emit(MidBranchControl(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_forward, True), label_cond_backward)
         self.emit(MidBranchControl(counter_var, label_counter_forward), label_counter_backward)
 
     def uncomp_AssignNode(self, assign):
@@ -156,12 +159,12 @@ class High2MidTransLator:
             if cond:
                 self.visit(pre)
                 label_cond_forward, label_cond_backward = self.get_label_pair()
-                self.emit(MidBranchEqZ(Variable.get_var(cond.name(), cond.index()), label_cond_backward), label_cond_forward)
+                self.emit(MidBranchEqZ(Variable.get_var(cond.name(), cond.index()), label_cond_backward, True), label_cond_forward)
 
                 self.visit(body)
 
                 label_skip_forward, label_skip_backward = self.get_label_pair()
-                self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_backward), label_skip_forward)
+                self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_backward, True), label_skip_forward)
                 branch_back.append((MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_skip_forward), label_skip_backward, pre))
 
                 self.emit(MidBranchControl(Variable.get_var(cond.name(), cond.index()), label_cond_forward), label_cond_backward)
@@ -179,12 +182,12 @@ class High2MidTransLator:
 
         self.visit(whilestmt._pre)
         label_cond_forward, label_cond_backward = self.get_label_pair()
-        self.emit(MidBranchEqZ(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_backward), label_cond_forward)
+        self.emit(MidBranchEqZ(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_backward, True), label_cond_forward)
 
         self.emit(MidAddi(counter_var, Variable.get_var(1)))
         self.visit(whilestmt._body)
 
-        self.emit(MidBranchControl(counter_var, label_counter_forward), label_counter_backward)
+        self.emit(MidBranchControl(counter_var, label_counter_forward, True), label_counter_backward)
         self.emit(MidBranchControl(Variable.get_var(whilestmt._cond.name(), whilestmt._cond.index()), label_cond_forward), label_cond_backward)
         self.emit(Push(counter_var))
 
@@ -194,9 +197,9 @@ class High2MidTransLator:
 
         label_skip_zero_forward, label_skip_zero_backward = self.get_label_pair()
         label_skip_one_forward, label_skip_one_backward = self.get_label_pair()
-        self.emit(MidBranchNeqZ(qbit, label_skip_zero_backward), label_skip_zero_forward)
+        self.emit(MidBranchNeqZ(qbit, label_skip_zero_backward, True), label_skip_zero_forward)
         #self.visit(qifstmt)
-        self.emit(MidBranchControl(qbit, label_skip_one_backward), label_skip_one_forward)
+        self.emit(MidBranchControl(qbit, label_skip_one_backward, True), label_skip_one_forward)
         self.emit(MidBranchControl(qbit, label_skip_zero_forward), label_skip_zero_backward)
         #self.visit
         self.emit(MidBranchEqZ(qbit, label_skip_one_forward), label_skip_one_backward)

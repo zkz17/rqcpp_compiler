@@ -1,14 +1,18 @@
 from utils.memorytable import MemoryTable
 from utils.mid_level.variable import Variable
+from rqcoptimizer import RQCOptimizer
 
 # Code Generator class
 class RQCGenerator:
     def __init__(self):
-        pass
+        self.optimizer = RQCOptimizer()
 
     def generate(self, ast):
         ## High-level to mid-level translation
         mid_code = self.high2midTrans(ast)
+
+        ## Mid-level optimization
+        mid_code = self.optimizer.midlevel_optimize(mid_code)
 
         ## Memory allocation
         mem_table = self.mem_allocate(ast, mid_code)
