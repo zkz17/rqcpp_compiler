@@ -2,3 +2,4 @@ __pycache__/
 experiment.py
 temp.txt
 output.txt
+*.egg-info
