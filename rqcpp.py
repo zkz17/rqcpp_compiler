@@ -7,6 +7,57 @@ import sys
 
 DEBUG = True
 
+def compile(text, debug=False):
+    ## Tokenize. 
+    text.expandtabs(4)
+    lexer = RQCLexer(text)
+    lexer.tokenize()
+    tokens = lexer.tokens()
+
+    if debug:
+        print(' ****** ****** Token List ****** ******')
+        print(tokens)
+        print()
+
+    ## Generate AST. 
+    parser = RQCParser(tokens)
+    ast = parser.parse()
+    if debug: 
+        print(' ****** ****** AST Structure ****** ******')
+        ast.print()
+        print()
+
+    ## Semantic Analysis.
+    analyzer = RQCAnalyzer()
+    analyzer.analyze(ast)
+    if debug:
+        print(' ****** ****** Symbol Table ****** ******')
+        ast._symbols.print()
+        print()
+
+    ## High-Level Transformation. 
+    transformer = RQCTransformer()
+    transformer.transform(ast)
+    if debug: 
+        print(' ****** ****** AST Structure After High-Level Transformation ****** ******')
+        ast.print()
+        print()
+
+    ## Code Generation.
+    generator = RQCGenerator()
+    code, mid, mem = generator.generate(ast)
+    if debug:
+        print(' ****** ****** Mid-Level Code ****** ******')
+        mid.print()
+        print()
+        print(' ****** ****** Memory Allocation ****** ******')
+        mem.print()
+        print()
+        print(' ****** ****** Low-Level Code ****** ******')
+        code.print()
+
+    return code
+
 def main():
     ## Locate input & output files. 
     input_path='./test/test.rqcpp'
@@ -32,56 +83,7 @@ def main():
         print('Failed to open file ', input_path)
         exit(0)
 
-    ## Tokenize. 
-    text.expandtabs(4)
-    lexer = RQCLexer(text)
-    lexer.tokenize()
-    tokens = lexer.tokens()
-
-    if DEBUG:
-        print(' ****** ****** Program Text ****** ******')
-        print(input_path, '--->\n', text)
-        print()
-        print(' ****** ****** Token List ****** ******')
-        print(tokens)
-        print()
-
-    ## Generate AST. 
-    parser = RQCParser(tokens)
-    ast = parser.parse()
-    if DEBUG: 
-        print(' ****** ****** AST Structure ****** ******')
-        ast.print()
-        print()
-
-    ## Semantic Analysis.
-    analyzer = RQCAnalyzer()
-    analyzer.analyze(ast)
-    if DEBUG:
-        print(' ****** ****** Symbol Table ****** ******')
-        ast._symbols.print()
-        print()
-
-    ## High-Level Transformation. 
-    transformer = RQCTransformer()
-    transformer.transform(ast)
-    if DEBUG: 
-        print(' ****** ****** AST Structure After High-Level Transformation ****** ******')
-        ast.print()
-        print()
-
-    ## Code Generation.
-    generator = RQCGenerator()
-    code, mid, mem = generator.generate(ast)
-    if DEBUG:
-        print(' ****** ****** Mid-Level Code ****** ******')
-        mid.print()
-        print()
-        print(' ****** ****** Memory Allocation ****** ******')
-        mem.print()
-        print()
-        print(' ****** ****** Low-Level Code ****** ******')
-        code.print()
+    code = compile(text, DEBUG)
 
 if __name__ == "__main__": 
     main()
