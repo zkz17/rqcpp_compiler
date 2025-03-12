@@ -8,3 +8,6 @@ class RQCOptimizer:
     def midlevel_optimize(self, mid_code):
         cfg = CFGraph(mid_code)
         return mid_code
+    
+    def lowlevel_optimize(self, low_code):
+        return low_code

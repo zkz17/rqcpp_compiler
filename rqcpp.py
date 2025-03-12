@@ -84,6 +84,7 @@ def main():
         exit(0)
 
     code = compile(text, DEBUG)
+    code.write(output_path)
 
 if __name__ == "__main__": 
     main()

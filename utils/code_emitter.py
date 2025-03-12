@@ -10,6 +10,11 @@ class CodeList:
 
     def insert(self, inst, label=None):
         self.list.append((label, inst))
+
+    def write(self, path):
+        with open(path, 'w') as f:
+            for label, inst in self.list:
+                if not inst.is_unhandled(): f.write(inst.to_string() + '\n')
     
     def print(self):
         line_counter = 0

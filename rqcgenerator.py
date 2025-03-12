@@ -20,6 +20,9 @@ class RQCGenerator:
         ## Mid-level to Low-level translation
         low_code = self.mid2lowTrans(mid_code, mem_table)
 
+        ## Low-level optimization
+        low_code = self.optimizer.lowlevel_optimize(low_code)
+
         return low_code, mid_code, mem_table
 
     def high2midTrans(self, ast):
