@@ -1,5 +1,6 @@
 from utils.memorytable import MemoryTable
-from utils.mid_level.variable import Variable
+from utils.mid_level.variable import Variable, Immediate
+from utils.mid_level.label import Label
 from rqcoptimizer import RQCOptimizer
 
 # Code Generator class
@@ -9,7 +10,7 @@ class RQCGenerator:
 
     def generate(self, ast):
         ## High-level to mid-level translation
-        mid_code = self.high2midTrans(ast)
+        mid_code = self.high2mid_trans(ast)
 
         ## Mid-level optimization
         mid_code = self.optimizer.midlevel_optimize(mid_code)
@@ -18,19 +19,22 @@ class RQCGenerator:
         mem_table = self.mem_allocate(ast, mid_code)
 
         ## Mid-level to Low-level translation
-        low_code = self.mid2lowTrans(mid_code, mem_table)
+        low_code = self.mid2low_trans(mid_code, mem_table)
 
         ## Low-level optimization
         low_code = self.optimizer.lowlevel_optimize(low_code)
 
+        ## Label to immediate translation
+        self.label_trans(low_code)
+
         return low_code, mid_code, mem_table
 
-    def high2midTrans(self, ast):
+    def high2mid_trans(self, ast):
         from translator.high2mid_translator import High2MidTransLator
         translator = High2MidTransLator()
         return translator.translate(ast)
 
-    def mid2lowTrans(self, code, mem_table):
+    def mid2low_trans(self, code, mem_table):
         from translator.mid2low_translator import Mid2LowTransLator
         translator = Mid2LowTransLator(mem_table)
         return translator.translate(code)
@@ -43,3 +47,14 @@ class RQCGenerator:
                 if isinstance(child, Variable) and not child.is_immediate():
                     mem_table.allocate(child.name)
         return mem_table
+    
+    def label_trans(self, low_code):
+        label2line = {}
+        i = 0
+        for label, _ in low_code.list:
+            if not _.is_unhandled(): i += 1
+            if label: label2line[label.to_string()] = i
+        for _, inst in low_code.list:
+            for item in inst.__dict__.values():
+                if isinstance(item, Label):
+                    inst.imm = Immediate(label2line[item.to_string()])
