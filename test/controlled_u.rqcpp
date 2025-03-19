@@ -1,0 +1,18 @@
+qbits q[3]
+
+procedure CH(first, last):
+    if first == last then:
+        H(q[last])
+    else:
+        qif q[first]:
+            |0> ->
+                skip
+            |1> ->
+                first = first + 1
+                CH(first, last)
+        fiq
+    fi
+
+procedure main():
+    CH(0, 1)
+    CH(0, 2)
