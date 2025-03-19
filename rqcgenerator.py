@@ -52,8 +52,8 @@ class RQCGenerator:
         label2line = {}
         i = 0
         for label, _ in low_code.list:
-            if not _.is_unhandled(): i += 1
             if label: label2line[label.to_string()] = i
+            if not _.is_unhandled(): i += 1
         for _, inst in low_code.list:
             for item in inst.__dict__.values():
                 if isinstance(item, Label):
