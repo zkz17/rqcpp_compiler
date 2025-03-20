@@ -25,7 +25,7 @@ class RQCGenerator:
         low_code = self.optimizer.lowlevel_optimize(low_code)
 
         ## Label to immediate translation
-        self.label_trans(low_code)
+        self.link(low_code)
 
         return low_code, mid_code, mem_table
 
@@ -48,13 +48,15 @@ class RQCGenerator:
                     mem_table.allocate(child.name)
         return mem_table
     
-    def label_trans(self, low_code):
+    def link(self, low_code):
         label2line = {}
         i = 0
         for label, _ in low_code.list:
             if label: label2line[label.to_string()] = i
             if not _.is_unhandled(): i += 1
+        i = 0
         for _, inst in low_code.list:
             for item in inst.__dict__.values():
                 if isinstance(item, Label):
-                    inst.imm = Immediate(label2line[item.to_string()])
+                    inst.imm = Immediate(label2line[item.to_string()] - i)
+            if not inst.is_unhandled(): i += 1

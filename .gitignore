@@ -1,5 +1,4 @@
 __pycache__/
 experiment.py
-temp.txt
-output.txt
+*.txt
 *.qins
