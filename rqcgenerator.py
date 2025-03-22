@@ -58,5 +58,6 @@ class RQCGenerator:
         for _, inst in low_code.list:
             for item in inst.__dict__.values():
                 if isinstance(item, Label):
-                    inst.imm = Immediate(label2line[item.to_string()] - i)
+                    if inst.to_string()[:3] in ['bra', 'bnz', 'bez']: inst.imm = Immediate(label2line[item.to_string()] - i)
+                    else: inst.imm = Immediate(label2line[item.to_string()])
             if not inst.is_unhandled(): i += 1
